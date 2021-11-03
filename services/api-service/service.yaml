@@ -1,5 +1,5 @@
 Description: >
-  This is an example of a long running ECS service that serves a JSON API of products.
+  This is an example of a long running ECS service that serves the core SuperGuard API
 
 Parameters:
   VPC:
@@ -19,10 +19,14 @@ Parameters:
     Description: The Application Load Balancer listener to register with
     Type: String
 
-  Path:
-    Description: The path to register with the Application Load Balancer
+  Host:
+    Description: The host to register with the Application Load Balancer
     Type: String
-    Default: /products
+    Default: api.superguard.com.au
+  
+  ImageTag:
+    Description: The Docker tag to build for this service
+    Type: String
 
 Resources:
   Service:
@@ -34,19 +38,19 @@ Resources:
       DesiredCount: !Ref DesiredCount
       TaskDefinition: !Ref TaskDefinition
       LoadBalancers:
-        - ContainerName: "product-service"
+        - ContainerName: "api-service"
           ContainerPort: 8001
           TargetGroupArn: !Ref TargetGroup
 
   TaskDefinition:
     Type: AWS::ECS::TaskDefinition
     Properties:
-      Family: product-service
+      Family: api-service
       ContainerDefinitions:
-        - Name: product-service
+        - Name: api-service
           Essential: true
-          Image: 275396840892.dkr.ecr.us-east-1.amazonaws.com/ecs-refarch-cloudformation/product-service:1.0.0
-          Memory: 128
+          Image: !Sub 797885264545.dkr.ecr.ap-southeast-2.amazonaws.com/superguard/api-service:${ImageTag}
+          Memory: 2048
           PortMappings:
             - ContainerPort: 8001
           LogConfiguration:
@@ -70,7 +74,7 @@ Resources:
       Matcher:
         HttpCode: 200-299
       HealthCheckIntervalSeconds: 10
-      HealthCheckPath: /products
+      HealthCheckPath: /
       HealthCheckProtocol: HTTP
       HealthCheckTimeoutSeconds: 5
       HealthyThresholdCount: 2
@@ -81,9 +85,8 @@ Resources:
       ListenerArn: !Ref Listener
       Priority: 2
       Conditions:
-        - Field: path-pattern
-          Values:
-            - !Ref Path
+        - Field: host-header
+          Values: !Split [",", !Ref Host]
       Actions:
         - TargetGroupArn: !Ref TargetGroup
           Type: forward

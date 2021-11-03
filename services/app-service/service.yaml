@@ -21,21 +21,21 @@ Parameters:
     Type: Number
     Default: 3
 
-  ProductServiceUrl:
-    Description: The URL of the Product Service (used to fetch product information)
-    Type: String
-
   Listener:
     Description: The Application Load Balancer listener to register with
     Type: String
 
-  Path:
-    Description: The path to register with the Application Load Balancer
+  Host:
+    Description: The host to register with the Application Load Balancer
     Type: String
-    Default: /
+    Default: "app.superguard.com.au,*.app.superguard.com.au"
 
   ECSServiceAutoScalingRoleARN:
     Description: The ECS service auto scaling role ARN
+    Type: String
+
+  ImageTag:
+    Description: The Docker tag to build for this service
     Type: String
 
 Resources:
@@ -48,22 +48,19 @@ Resources:
       DesiredCount: !Ref DesiredCount
       TaskDefinition: !Ref TaskDefinition
       LoadBalancers:
-        - ContainerName: "website-service"
+        - ContainerName: "app-service"
           ContainerPort: 8000
           TargetGroupArn: !Ref TargetGroup
 
   TaskDefinition:
     Type: AWS::ECS::TaskDefinition
     Properties:
-      Family: website-service
+      Family: app-service
       ContainerDefinitions:
-        - Name: website-service
+        - Name: app-service
           Essential: true
-          Image: 275396840892.dkr.ecr.us-east-1.amazonaws.com/ecs-refarch-cloudformation/website-service:1.0.0
-          Memory: 128
-          Environment:
-            - Name: PRODUCT_SERVICE_URL
-              Value: !Ref ProductServiceUrl
+          Image: !Sub 797885264545.dkr.ecr.ap-southeast-2.amazonaws.com/superguard/app-service:${ImageTag}
+          Memory: 1024
           PortMappings:
             - ContainerPort: 8000
           LogConfiguration:
@@ -98,9 +95,8 @@ Resources:
       ListenerArn: !Ref Listener
       Priority: 1
       Conditions:
-        - Field: path-pattern
-          Values:
-            - !Ref Path
+        - Field: host-pattern
+          Values: !Split [",", !Ref Host]
       Actions:
         - TargetGroupArn: !Ref TargetGroup
           Type: forward
