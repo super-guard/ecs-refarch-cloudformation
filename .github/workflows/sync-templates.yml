@@ -1,4 +1,4 @@
-name: Staging API
+name: Sync Cloudformation Templates
 
 on:
   push:
