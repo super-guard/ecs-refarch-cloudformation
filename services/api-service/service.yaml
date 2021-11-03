@@ -86,7 +86,8 @@ Resources:
       Priority: 2
       Conditions:
         - Field: host-header
-          Values: !Split [",", !Ref Host]
+          HostHeaderConfig:
+            Values: !Split [",", !Ref Host]
       Actions:
         - TargetGroupArn: !Ref TargetGroup
           Type: forward

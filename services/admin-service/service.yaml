@@ -96,7 +96,8 @@ Resources:
       Priority: 1
       Conditions:
         - Field: host-pattern
-          Values: !Split [",", !Ref Host]
+          HostHeaderConfig:
+            Values: !Split [",", !Ref Host]
       Actions:
         - TargetGroupArn: !Ref TargetGroup
           Type: forward
