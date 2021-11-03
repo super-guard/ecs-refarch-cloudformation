@@ -49,7 +49,7 @@ Resources:
       ContainerDefinitions:
         - Name: api-service
           Essential: true
-          Image: !Sub 797885264545.dkr.ecr.ap-southeast-2.amazonaws.com/superguard/api-service:${ImageTag}
+          Image: !Sub ${AWS::AccountId}.dkr.ecr.${AWS::Region}.amazonaws.com/superguard/api-service:${ImageTag}
           Memory: 2048
           PortMappings:
             - ContainerPort: 8001

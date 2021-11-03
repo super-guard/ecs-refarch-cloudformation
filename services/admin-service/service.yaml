@@ -59,7 +59,7 @@ Resources:
       ContainerDefinitions:
         - Name: admin-service
           Essential: true
-          Image: !Sub 797885264545.dkr.ecr.ap-southeast-2.amazonaws.com/superguard/admin-service:${ImageTag}
+          Image: !Sub ${AWS::AccountId}.dkr.ecr.${AWS::Region}.amazonaws.com/superguard/admin-service:${ImageTag}
           Memory: 512
           PortMappings:
             - ContainerPort: 8000
