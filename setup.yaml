@@ -78,6 +78,10 @@ Resources:
           - Action:
             - "iam:*"
             Effect: Allow
+            Resource: !Sub "arn:${AWS::Partition}:iam::${AWS::AccountId}:role/ecs-service-superguard-*"
+          - Action:
+            - "iam:*"
+            Effect: Allow
             Resource: !Sub "arn:${AWS::Partition}:iam::${AWS::AccountId}:instance-profile/superguard-*"
           - Action:
               - "ecr:*"
