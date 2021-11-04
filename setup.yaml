@@ -33,28 +33,59 @@ Resources:
         Version: "2012-10-17"
         Statement:
           - Action:
+              # TODO: Reduce this scope later
               - "cloudformation:*"
-              - "ec2:DescribeVpcs"
-              - "ec2:DescribeSubnets"
-              - "ecr:GetAuthorizationToken"
+              - "ec2:*"
+              - "ecs:*"
+              - "ssm:*"
+              - "sns:*"
+              - "lambda:*"
+              - "autoscaling:*"
+              - "elasticloadbalancing:*"
             Effect: Allow
             Resource: "*"
+          - Action:
+              - "elasticloadbalancing:*"
+            Effect: Allow
+            Resource: !Sub "arn:${AWS::Partition}:elasticloadbalancing:*:${AWS::AccountId}:loadbalancer/app/superguard-*"
+          - Action:
+              - "lambda:*"
+            Effect: Allow
+            Resource: !Sub "arn:${AWS::Partition}:lambda:*:${AWS::AccountId}:function/superguard-*"
+          - Action:
+              - "autoscaling:*"
+            Effect: Allow
+            Resource: !Sub "arn:${AWS::Partition}:autoscaling:*:${AWS::AccountId}:launchConfiguration:*:launchConfigurationName/superguard-*"
+          - Action:
+              - "autoscaling:*"
+            Effect: Allow
+            Resource: !Sub "arn:${AWS::Partition}:autoscaling:*:${AWS::AccountId}:autoScalingGroup:*:autoScalingGroupName/superguard-*"
           - Action: "cloudformation:DeleteStack"
             Effect: Deny
             Resource: "*"
-          - Action: "iam:PassRole"
+          - Action:
+            - "iam:PassRole"
+            - "iam:GetRole"
+            - "iam:CreateRole"
+            - "iam:DeleteRolePolicy"
             Effect: Allow
             Resource: !GetAtt CloudFormationDeploymentRole.Arn
           - Action:
-              - "ecr:GetDownloadUrlForLayer"
-              - "ecr:BatchGetImage"
-              - "ecr:BatchCheckLayerAvailability"
-              - "ecr:PutImage"
-              - "ecr:InitiateLayerUpload"
-              - "ecr:UploadLayerPart"
-              - "ecr:CompleteLayerUpload"
+            - "iam:*"
+            Effect: Allow
+            Resource: !Sub "arn:${AWS::Partition}:iam::${AWS::AccountId}:role/superguard-*"
+          - Action:
+            - "iam:*"
+            Effect: Allow
+            Resource: !Sub "arn:${AWS::Partition}:iam::${AWS::AccountId}:instance-profile/superguard-*"
+          - Action:
+              - "ecr:*"
             Effect: Allow
             Resource: !Sub "arn:${AWS::Partition}:ecr:*:${AWS::AccountId}:repository/github-actions-*"
+          - Action:
+              - "ecs:*"
+            Effect: Allow
+            Resource: !Sub "arn:${AWS::Partition}:ecs:*:${AWS::AccountId}:cluster/superguard-*"
           - Action:
               - "s3:ListBucket"
             Effect: Allow
