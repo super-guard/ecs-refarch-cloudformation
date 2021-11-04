@@ -40,6 +40,7 @@ The templates below are included in this repository and reference architecture:
 
 | Template | Description |
 | --- | --- | 
+| [setup.yaml](setup.yaml) | This is the setup script template - deploy it to CloudFormation and it will generate the required IAM user with roles needed for all the other deployments. |
 | [master.yaml](master.yaml) | This is the master template - deploy it to CloudFormation and it includes all of the others automatically. |
 | [infrastructure/vpc.yaml](infrastructure/vpc.yaml) | This template deploys a VPC with a pair of public and private subnets spread across two Availability Zones. It deploys an [Internet gateway](http://docs.aws.amazon.com/AmazonVPC/latest/UserGuide/VPC_Internet_Gateway.html), with a default route on the public subnets. It deploys a pair of NAT gateways (one in each zone), and default routes for them in the private subnets. |
 | [infrastructure/security-groups.yaml](infrastructure/security-groups.yaml) | This template contains the [security groups](http://docs.aws.amazon.com/AmazonVPC/latest/UserGuide/VPC_SecurityGroups.html) required by the entire stack. They are created in a separate nested template, so that they can be referenced by all of the other nested templates. |
@@ -53,6 +54,27 @@ After the CloudFormation templates have been deployed, the [stack outputs](http:
 The ECS instances should also appear in the Managed Instances section of the EC2 console.
 
 ## How do I...?
+
+### Create the required IAM user
+1. Deploy the setup template
+  ```bash
+  $ aws cloudformation deploy \
+    --stack-name github-actions-cloudformation-deploy-setup \
+    --template-file setup.yaml \
+    --capabilities CAPABILITY_NAMED_IAM \
+    --region ap-southeast-2 \
+    --profile sg
+  ```
+2. Get the newly created user secrets
+  ```bash
+  $ aws secretsmanager get-secret-value \
+    --secret-id github-actions-cloudformation-deploy \
+    --region ap-southeast-2 \
+    --query SecretString \
+    --output text \
+    --profile sg
+  ```
+3. Add the returned `AccessKeyId`, and `SecretAccessKey` as Github Secrets in the service repository
 
 ### Create a new ECS service
 

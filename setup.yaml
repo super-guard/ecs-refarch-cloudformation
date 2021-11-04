@@ -11,6 +11,10 @@ Parameters:
   ECSTaskExecutionRoleName:
     Type: String
     Default: github-actions-ecs-task-execution-role
+  S3Bucket:
+    Type: String
+    Description: Please provide the S3 Bucket to find the Cloudformation yaml files
+    Default: superguard-ecs-cloudformation
 
 Resources:
   GitHubActionsUser:
@@ -51,6 +55,14 @@ Resources:
               - "ecr:CompleteLayerUpload"
             Effect: Allow
             Resource: !Sub "arn:${AWS::Partition}:ecr:*:${AWS::AccountId}:repository/github-actions-*"
+          - Action:
+              - "s3:ListBucket"
+            Effect: Allow
+            Resource: !Sub "arn:aws:s3:::${S3Bucket}"
+          - Action:
+              - "s3:GetObject"
+            Effect: Allow
+            Resource: !Sub "arn:aws:s3:::${S3Bucket}/*"
 
   GitHubActionsUserAccessKey:
     Type: AWS::IAM::AccessKey
