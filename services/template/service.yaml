@@ -82,8 +82,8 @@ Resources:
   TargetGroup:
     Type: AWS::ElasticLoadBalancingV2::TargetGroup
     Properties:
-      VpcId: Fn::ImportValue:
-        !Sub ${Env}-SubnetID
+      VpcId:
+        Fn::ImportValue: !Sub ${EnvironmentName}-SubnetID
 
       Port: 80
       Protocol: HTTP

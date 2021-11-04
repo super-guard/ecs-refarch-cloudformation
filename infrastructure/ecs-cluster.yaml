@@ -125,6 +125,11 @@ Resources:
                   - /etc/cfn/cfn-hup.conf
                   - /etc/cfn/hooks.d/cfn-auto-reloader.conf
 
+  ImageRepository:
+    Type: AWS::ECR::Repository
+    Properties:
+      RepositoryName: !Sub "github-actions-${EnvironmentName}"
+
   # This IAM Role is attached to all of the ECS hosts. It is based on the default role
   # published here:
   # http://docs.aws.amazon.com/AmazonECS/latest/developerguide/instance_IAM_role.html
