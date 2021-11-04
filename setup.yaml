@@ -39,6 +39,7 @@ Resources:
               - "ecs:*"
               - "ssm:*"
               - "sns:*"
+              - "ecr:*"
               - "lambda:*"
               - "autoscaling:*"
               - "elasticloadbalancing:*"
