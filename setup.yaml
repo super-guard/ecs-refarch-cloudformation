@@ -65,22 +65,22 @@ Resources:
             Effect: Deny
             Resource: "*"
           - Action:
-            - "iam:PassRole"
-            - "iam:GetRole"
-            - "iam:CreateRole"
-            - "iam:DeleteRolePolicy"
+              - "iam:PassRole"
+              - "iam:GetRole"
+              - "iam:CreateRole"
+              - "iam:DeleteRolePolicy"
             Effect: Allow
             Resource: !GetAtt CloudFormationDeploymentRole.Arn
           - Action:
-            - "iam:*"
+              - "iam:*"
             Effect: Allow
             Resource: !Sub "arn:${AWS::Partition}:iam::${AWS::AccountId}:role/superguard-*"
           - Action:
-            - "iam:*"
+              - "iam:*"
             Effect: Allow
-            Resource: !Sub "arn:${AWS::Partition}:iam::${AWS::AccountId}:role/ecs-service-superguard-*"
+            Resource: !Sub "arn:${AWS::Partition}:iam::${AWS::AccountId}:role/ecs-service-*"
           - Action:
-            - "iam:*"
+              - "iam:*"
             Effect: Allow
             Resource: !Sub "arn:${AWS::Partition}:iam::${AWS::AccountId}:instance-profile/superguard-*"
           - Action:
