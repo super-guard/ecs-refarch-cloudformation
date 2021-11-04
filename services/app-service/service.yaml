@@ -25,10 +25,9 @@ Parameters:
     Description: The Application Load Balancer listener to register with
     Type: String
 
-  Host:
+  Hosts:
     Description: The host to register with the Application Load Balancer
     Type: String
-    Default: app.superguard.com.au, *.app.superguard.com.au
 
   ECSServiceAutoScalingRoleARN:
     Description: The ECS service auto scaling role ARN
@@ -95,9 +94,9 @@ Resources:
       ListenerArn: !Ref Listener
       Priority: 1
       Conditions:
-        - Field: host-pattern
+        - Field: host-header
           HostHeaderConfig:
-            Values: !Split [",", !Ref Host]
+            Values: !Split [",", !Ref Hosts]
       Actions:
         - TargetGroupArn: !Ref TargetGroup
           Type: forward

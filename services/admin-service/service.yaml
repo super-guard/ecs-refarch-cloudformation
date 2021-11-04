@@ -25,10 +25,9 @@ Parameters:
     Description: The Application Load Balancer listener to register with
     Type: String
 
-  Host:
+  Hosts:
     Description: The host to register with the Application Load Balancer
     Type: String
-    Default: portal.superguard.com.au
   
   ECSServiceAutoScalingRoleARN:
     Description: The ECS service auto scaling role ARN
@@ -93,11 +92,11 @@ Resources:
     Type: AWS::ElasticLoadBalancingV2::ListenerRule
     Properties:
       ListenerArn: !Ref Listener
-      Priority: 1
+      Priority: 3
       Conditions:
-        - Field: host-pattern
+        - Field: host-header
           HostHeaderConfig:
-            Values: !Split [",", !Ref Host]
+            Values: !Split [",", !Ref Hosts]
       Actions:
         - TargetGroupArn: !Ref TargetGroup
           Type: forward

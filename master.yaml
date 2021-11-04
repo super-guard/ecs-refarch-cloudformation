@@ -88,8 +88,8 @@ Resources:
         Cluster: !GetAtt ECS.Outputs.Cluster
         DesiredCount: 2
         Listener: !GetAtt ALB.Outputs.Listener
-        Host: api
         ImageTag: !Sub ${APIServiceTag}
+        Hosts: api.superguard.com.au
 
   AppService:
     Type: AWS::CloudFormation::Stack
@@ -102,6 +102,7 @@ Resources:
         Listener: !GetAtt ALB.Outputs.Listener
         ECSServiceAutoScalingRoleARN: !GetAtt ECS.Outputs.ECSServiceAutoScalingRole
         ImageTag: !Sub ${AppServiceTag}
+        Hosts: app.superguard.com.au,*.app.superguard.com.au
   
   AdminService:
     Type: AWS::CloudFormation::Stack
@@ -114,6 +115,7 @@ Resources:
         Listener: !GetAtt ALB.Outputs.Listener
         ECSServiceAutoScalingRoleARN: !GetAtt ECS.Outputs.ECSServiceAutoScalingRole
         ImageTag: !Sub ${AdminServiceTag}
+        Hosts: portal.superguard.com.au
 
   LifecycleHook:
     Type: AWS::CloudFormation::Stack

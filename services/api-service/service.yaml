@@ -19,10 +19,9 @@ Parameters:
     Description: The Application Load Balancer listener to register with
     Type: String
 
-  Host:
+  Hosts:
     Description: The host to register with the Application Load Balancer
     Type: String
-    Default: api.superguard.com.au
   
   ImageTag:
     Description: The Docker tag to build for this service
@@ -87,7 +86,7 @@ Resources:
       Conditions:
         - Field: host-header
           HostHeaderConfig:
-            Values: !Split [",", !Ref Host]
+            Values: !Split [",", !Ref Hosts]
       Actions:
         - TargetGroupArn: !Ref TargetGroup
           Type: forward
