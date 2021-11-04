@@ -15,26 +15,20 @@ Description: >
   Author: Paul Maddox <pmaddox@amazon.com>
 
 Parameters:
+  EnvironmentName:
+    Type: String
+    Default: production
+    Description: The name of the environment to add this load balancer to
+
   S3Bucket:
     Type: String
     Description: Please provide the S3 Bucket to find the Cloudformation yaml files
     Default: superguard-ecs-cloudformation
+
   S3Region:
     Type: String
     Description: Please provide the S3 region hosting the S3 bucket
     Default: ap-southeast-2
-  
-  APIServiceTag:
-    Description: The tag to build for the api service
-    Type: String
-    
-  AdminServiceTag:
-    Description: The tag to build for the admin service
-    Type: String
-    
-  AppServiceTag:
-    Description: The tag to build for the app service
-    Type: String
 
 Resources:
   VPC:
@@ -42,7 +36,7 @@ Resources:
     Properties:
       TemplateURL: !Sub https://${S3Bucket}.s3.${S3Region}.amazonaws.com/infrastructure/vpc.yaml
       Parameters:
-        EnvironmentName: !Ref AWS::StackName
+        EnvironmentName: !Ref EnvironmentName
         VpcCIDR: 10.180.0.0/16
         PublicSubnet1CIDR: 10.180.8.0/21
         PublicSubnet2CIDR: 10.180.16.0/21
@@ -54,7 +48,7 @@ Resources:
     Properties:
       TemplateURL: !Sub https://${S3Bucket}.s3.${S3Region}.amazonaws.com/infrastructure/security-groups.yaml
       Parameters:
-        EnvironmentName: !Ref AWS::StackName
+        EnvironmentName: !Ref EnvironmentName
         VPC: !GetAtt VPC.Outputs.VPC
 
   ALB:
@@ -62,7 +56,7 @@ Resources:
     Properties:
       TemplateURL: !Sub https://${S3Bucket}.s3.${S3Region}.amazonaws.com/infrastructure/load-balancers.yaml
       Parameters:
-        EnvironmentName: !Ref AWS::StackName
+        EnvironmentName: !Ref EnvironmentName
         VPC: !GetAtt VPC.Outputs.VPC
         Subnets: !GetAtt VPC.Outputs.PublicSubnets
         SecurityGroup: !GetAtt SecurityGroups.Outputs.LoadBalancerSecurityGroup
@@ -72,50 +66,12 @@ Resources:
     Properties:
       TemplateURL: !Sub https://${S3Bucket}.s3.${S3Region}.amazonaws.com/infrastructure/ecs-cluster.yaml
       Parameters:
-        EnvironmentName: !Ref AWS::StackName
+        EnvironmentName: !Ref EnvironmentName
         InstanceType: t2.large
         ClusterSize: 4
         VPC: !GetAtt VPC.Outputs.VPC
         SecurityGroup: !GetAtt SecurityGroups.Outputs.ECSHostSecurityGroup
         Subnets: !GetAtt VPC.Outputs.PrivateSubnets
-
-  APIService:
-    Type: AWS::CloudFormation::Stack
-    Properties:
-      TemplateURL: !Sub https://${S3Bucket}.s3.${S3Region}.amazonaws.com/services/api-service/service.yaml
-      Parameters:
-        VPC: !GetAtt VPC.Outputs.VPC
-        Cluster: !GetAtt ECS.Outputs.Cluster
-        DesiredCount: 2
-        Listener: !GetAtt ALB.Outputs.Listener
-        ImageTag: !Sub ${APIServiceTag}
-        Hosts: api.superguard.com.au
-
-  AppService:
-    Type: AWS::CloudFormation::Stack
-    Properties:
-      TemplateURL: !Sub https://${S3Bucket}.s3.${S3Region}.amazonaws.com/services/app-service/service.yaml
-      Parameters:
-        VPC: !GetAtt VPC.Outputs.VPC
-        Cluster: !GetAtt ECS.Outputs.Cluster
-        DesiredCount: 2
-        Listener: !GetAtt ALB.Outputs.Listener
-        ECSServiceAutoScalingRoleARN: !GetAtt ECS.Outputs.ECSServiceAutoScalingRole
-        ImageTag: !Sub ${AppServiceTag}
-        Hosts: app.superguard.com.au,*.app.superguard.com.au
-  
-  AdminService:
-    Type: AWS::CloudFormation::Stack
-    Properties:
-      TemplateURL: !Sub https://${S3Bucket}.s3.${S3Region}.amazonaws.com/services/admin-service/service.yaml
-      Parameters:
-        VPC: !GetAtt VPC.Outputs.VPC
-        Cluster: !GetAtt ECS.Outputs.Cluster
-        DesiredCount: 2
-        Listener: !GetAtt ALB.Outputs.Listener
-        ECSServiceAutoScalingRoleARN: !GetAtt ECS.Outputs.ECSServiceAutoScalingRole
-        ImageTag: !Sub ${AdminServiceTag}
-        Hosts: portal.superguard.com.au
 
   LifecycleHook:
     Type: AWS::CloudFormation::Stack
@@ -126,10 +82,26 @@ Resources:
         ECSAutoScalingGroupName: !GetAtt ECS.Outputs.ECSAutoScalingGroupName
 
 Outputs:
-  ProductServiceUrl:
-    Description: The URL endpoint for the product service
-    Value: !Join ["/", [!GetAtt ALB.Outputs.LoadBalancerUrl, "products"]]
-
-  WebsiteServiceUrl:
-    Description: The URL endpoint for the website service
-    Value: !Join ["", [!GetAtt ALB.Outputs.LoadBalancerUrl, "/"]]
+  VPC:
+    Description: The ID of the VPC that this stack is deployed in
+    Value: !GetAtt VPC.Outputs.VPC
+    Export:
+      Name: !Sub ${EnvironmentName}:VPC
+  
+  Cluster: 
+    Description: The ECS Cluster ID that services should run on
+    Value: !GetAtt ECS.Outputs.Cluster
+    Export:
+      Name: !Sub ${EnvironmentName}:Cluster
+          
+  Listener: 
+    Description: The Application Load Balancer listener to register services with
+    Value: !GetAtt ALB.Outputs.Listener
+    Export:
+      Name: !Sub ${EnvironmentName}:Listener
+  
+  ECSServiceAutoScalingRoleARN:
+    Description: The ECS service auto scaling role ARN
+    Value: !GetAtt ECS.Outputs.ECSServiceAutoScalingRole
+    Export:
+      Name: !Sub ${EnvironmentName}:ECSServiceAutoScalingRoleARN
