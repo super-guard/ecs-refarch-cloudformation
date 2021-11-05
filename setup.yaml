@@ -92,6 +92,10 @@ Resources:
             Effect: Allow
             Resource: !Sub "arn:${AWS::Partition}:ecs:*:${AWS::AccountId}:cluster/superguard-*"
           - Action:
+              - "logs:*"
+            Effect: Allow
+            Resource: !Sub "arn:${AWS::Partition}:logs:*:${AWS::AccountId}:log-group:superguard-*"
+          - Action:
               - "s3:ListBucket"
             Effect: Allow
             Resource: !Sub "arn:aws:s3:::${S3Bucket}"
