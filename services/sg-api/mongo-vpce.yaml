@@ -1,0 +1,29 @@
+Description: >
+  This is the VPC Endpoint used by PrivateLink to connect to the MongoDB VPC
+
+Parameters:
+  EnvironmentName:
+    Type: String
+    Description: The name of the environment to add this service to
+    Default: superguard-production
+
+  MongoVPCEServiceName:
+    Type: String
+    Description: The MongoDB VPCE service name
+
+Resources:
+  MongoDBEndpoint:
+    Type: AWS::EC2::VPCEndpoint
+    Properties:
+      VpcEndpointType: Interface
+      ServiceName: !Ref MongoVPCEServiceName
+      VpcId:
+        Fn::ImportValue: !Sub ${EnvironmentName}:VPC
+      SubnetIds: !Split
+        - ','
+        - Fn::ImportValue: !Sub ${EnvironmentName}:PrivateSubnets
+
+Outputs:
+  MongoEndpointID:
+    Description: The VPC Endpoint ID to use for linking the MongoDB service to our private subnets
+    Value: !Ref MongoDBEndpoint

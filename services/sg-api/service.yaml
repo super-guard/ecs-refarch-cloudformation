@@ -194,20 +194,6 @@ Resources:
         - TargetGroupArn: !Ref TargetGroup
           Type: forward
 
-  MongoDBEndpoint:
-    Type: AWS::EC2::VPCEndpoint
-    Properties:
-      VpcEndpointType: Interface
-      ServiceName: !Sub
-        - '{{resolve:secretsmanager:${SecretArn}:SecretString:MONGO_VPCE_SERVICE_NAME}}'
-        - SecretArn:
-            Fn::ImportValue: !Sub '${EnvironmentName}:APISecretArn'
-      VpcId:
-        Fn::ImportValue: !Sub ${EnvironmentName}:VPC
-      SubnetIds: !Split
-        - ','
-        - Fn::ImportValue: !Sub ${EnvironmentName}:PrivateSubnets
-
   # This IAM Role grants the service access to register/unregister with the
   # Application Load Balancer (ALB). It is based on the default documented here:
   # http://docs.aws.amazon.com/AmazonECS/latest/developerguide/service_IAM_role.html
@@ -249,8 +235,3 @@ Resources:
                   - 'elasticloadbalancing:DescribeTargetHealth'
                   - 'elasticloadbalancing:RegisterTargets'
                 Resource: '*'
-
-Outputs:
-  MongoEndpointID:
-    Description: The VPC Endpoint ID to use for linking the MongoDB service to our private subnets
-    Value: !Ref MongoDBEndpoint

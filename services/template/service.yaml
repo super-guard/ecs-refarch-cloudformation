@@ -8,10 +8,6 @@ Parameters:
     Default: production
     Description: The name of the environment to add this service to
 
-  VPC:
-    Description: The VPC that the ECS cluster is deployed to
-    Type: AWS::EC2::VPC::Id
-
   Cluster:
     Description: Please provide the ECS Cluster ID that this service should run on
     Type: String
