@@ -85,6 +85,18 @@ Outputs:
     Value: !GetAtt VPC.Outputs.VPC
     Export:
       Name: !Sub ${EnvironmentName}:VPC
+      
+  PublicSubnets:
+    Description: A comma separated list of the public subnets
+    Value: !GetAtt VPC.Outputs.PublicSubnets
+    Export:
+      Name: !Sub ${EnvironmentName}:PublicSubnets
+
+  PrivateSubnets:
+    Description: A comma separated list of the private subnets
+    Value: !GetAtt VPC.Outputs.PrivateSubnets
+    Export:
+      Name: !Sub ${EnvironmentName}:PrivateSubnets
   
   Cluster: 
     Description: The ECS Cluster ID that services should run on
