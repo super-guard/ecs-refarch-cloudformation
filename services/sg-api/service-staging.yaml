@@ -206,7 +206,7 @@ Resources:
         Fn::ImportValue:
           !Sub ${EnvironmentName}:VPC
       SubnetIds:
-        !Split:
+        !Split
           - ","
           - Fn::ImportValue:
               !Sub ${EnvironmentName}:PrivateSubnets
