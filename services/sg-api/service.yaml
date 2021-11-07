@@ -66,7 +66,7 @@ Resources:
       DesiredCount: !Ref DesiredCount
       TaskDefinition: !Ref TaskDefinition
       LoadBalancers:
-        - ContainerName: 'api-service'
+        - ContainerName: 'api-server'
           ContainerPort: !Ref EnvPort
           TargetGroupArn: !Ref TargetGroup
 
