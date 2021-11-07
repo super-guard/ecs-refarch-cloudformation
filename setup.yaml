@@ -1,4 +1,4 @@
-AWSTemplateFormatVersion: "2010-09-09"
+AWSTemplateFormatVersion: '2010-09-09'
 Description: Setup IAM user for GitHub Actions and IAM role for CloudFormation
 
 Parameters:
@@ -30,83 +30,83 @@ Resources:
         - !Ref GitHubActionsUser
       PolicyName: allow-github-actions-cloudformation-deploy
       PolicyDocument:
-        Version: "2012-10-17"
+        Version: '2012-10-17'
         Statement:
           - Action:
               # TODO: Reduce this scope later
-              - "cloudformation:*"
-              - "ec2:*"
-              - "ecs:*"
-              - "ssm:*"
-              - "sns:*"
-              - "ecr:*"
-              - "lambda:*"
-              - "autoscaling:*"
-              - "elasticloadbalancing:*"
+              - 'cloudformation:*'
+              - 'ec2:*'
+              - 'ecs:*'
+              - 'ssm:*'
+              - 'sns:*'
+              - 'ecr:*'
+              - 'lambda:*'
+              - 'autoscaling:*'
+              - 'elasticloadbalancing:*'
             Effect: Allow
-            Resource: "*"
+            Resource: '*'
           - Action:
-              - "elasticloadbalancing:*"
+              - 'elasticloadbalancing:*'
             Effect: Allow
-            Resource: !Sub "arn:${AWS::Partition}:elasticloadbalancing:*:${AWS::AccountId}:loadbalancer/app/superguard-*"
+            Resource: !Sub 'arn:${AWS::Partition}:elasticloadbalancing:*:${AWS::AccountId}:loadbalancer/app/superguard-*'
           - Action:
-              - "lambda:*"
+              - 'lambda:*'
             Effect: Allow
-            Resource: !Sub "arn:${AWS::Partition}:lambda:*:${AWS::AccountId}:function/superguard-*"
+            Resource: !Sub 'arn:${AWS::Partition}:lambda:*:${AWS::AccountId}:function/superguard-*'
           - Action:
-              - "autoscaling:*"
+              - 'autoscaling:*'
             Effect: Allow
-            Resource: !Sub "arn:${AWS::Partition}:autoscaling:*:${AWS::AccountId}:launchConfiguration:*:launchConfigurationName/superguard-*"
+            Resource: !Sub 'arn:${AWS::Partition}:autoscaling:*:${AWS::AccountId}:launchConfiguration:*:launchConfigurationName/superguard-*'
           - Action:
-              - "autoscaling:*"
+              - 'autoscaling:*'
             Effect: Allow
-            Resource: !Sub "arn:${AWS::Partition}:autoscaling:*:${AWS::AccountId}:autoScalingGroup:*:autoScalingGroupName/superguard-*"
-          - Action: "cloudformation:DeleteStack"
+            Resource: !Sub 'arn:${AWS::Partition}:autoscaling:*:${AWS::AccountId}:autoScalingGroup:*:autoScalingGroupName/superguard-*'
+          - Action: 'cloudformation:DeleteStack'
             Effect: Deny
-            Resource: "*"
+            Resource: '*'
           - Action:
-              - "iam:PassRole"
-              - "iam:GetRole"
-              - "iam:CreateRole"
-              - "iam:DeleteRolePolicy"
+              - 'iam:PassRole'
+              - 'iam:GetRole'
+              - 'iam:CreateRole'
+              - 'iam:DeleteRolePolicy'
             Effect: Allow
             Resource: !GetAtt CloudFormationDeploymentRole.Arn
           - Action:
-              - "iam:*"
+              - 'iam:*'
             Effect: Allow
-            Resource: !Sub "arn:${AWS::Partition}:iam::${AWS::AccountId}:role/superguard-*"
+            Resource: !Sub 'arn:${AWS::Partition}:iam::${AWS::AccountId}:role/superguard-*'
           - Action:
-              - "iam:*"
+              - 'iam:*'
             Effect: Allow
-            Resource: !Sub "arn:${AWS::Partition}:iam::${AWS::AccountId}:role/ecs-service-*"
+            Resource: !Sub 'arn:${AWS::Partition}:iam::${AWS::AccountId}:role/ecs-service-*'
           - Action:
-              - "iam:*"
+              - 'iam:*'
             Effect: Allow
-            Resource: !Sub "arn:${AWS::Partition}:iam::${AWS::AccountId}:instance-profile/superguard-*"
+            Resource: !Sub 'arn:${AWS::Partition}:iam::${AWS::AccountId}:instance-profile/superguard-*'
           - Action:
-              - "ecr:*"
+              - 'ecr:*'
             Effect: Allow
-            Resource: !Sub "arn:${AWS::Partition}:ecr:*:${AWS::AccountId}:repository/github-actions-*"
+            Resource: !Sub 'arn:${AWS::Partition}:ecr:*:${AWS::AccountId}:repository/github-actions-*'
           - Action:
-              - "ecs:*"
+              - 'ecs:*'
             Effect: Allow
-            Resource: !Sub "arn:${AWS::Partition}:ecs:*:${AWS::AccountId}:cluster/superguard-*"
+            Resource: !Sub 'arn:${AWS::Partition}:ecs:*:${AWS::AccountId}:cluster/superguard-*'
           - Action:
-              - "logs:*"
+              - 'logs:*'
             Effect: Allow
-            Resource: !Sub "arn:${AWS::Partition}:logs:*:${AWS::AccountId}:log-group:superguard-*"
+            Resource: !Sub 'arn:${AWS::Partition}:logs:*:${AWS::AccountId}:log-group:superguard-*'
           - Action:
-              - "secretsmanager:*"
+              - 'secretsmanager:*'
             Effect: Allow
-            Resource: !Sub "arn:${AWS::Partition}:secretsmanager:*:${AWS::AccountId}:secret:superguard-*"
+            Resource: !Sub 'arn:${AWS::Partition}:secretsmanager:*:${AWS::AccountId}:secret:superguard-*'
           - Action:
-              - "s3:ListBucket"
+              - 's3:ListBucket'
             Effect: Allow
-            Resource: !Sub "arn:aws:s3:::${S3Bucket}"
+            Resource: !Sub 'arn:aws:s3:::${S3Bucket}'
           - Action:
-              - "s3:GetObject"
+              - 's3:GetObject'
             Effect: Allow
-            Resource: !Sub "arn:aws:s3:::${S3Bucket}/*"
+            Resource: !Sub 'arn:aws:s3:::${S3Bucket}/*'
 
   GitHubActionsUserAccessKey:
     Type: AWS::IAM::AccessKey
@@ -130,14 +130,14 @@ Resources:
     Properties:
       RoleName: !Ref CloudFormationDeploymentRoleName
       AssumeRolePolicyDocument:
-        Version: "2012-10-17"
+        Version: '2012-10-17'
         Statement:
-          - Effect: "Allow"
+          - Effect: 'Allow'
             Principal:
               Service:
                 - cloudformation.amazonaws.com
             Action:
-              - "sts:AssumeRole"
+              - 'sts:AssumeRole'
       ManagedPolicyArns:
         - arn:aws:iam::aws:policy/AmazonVPCFullAccess
         - arn:aws:iam::aws:policy/AmazonEC2ContainerRegistryFullAccess
@@ -147,9 +147,9 @@ Resources:
       Policies:
         - PolicyName: allow-pass-role-for-ecs-task-exec-role
           PolicyDocument:
-            Version: "2012-10-17"
+            Version: '2012-10-17'
             Statement:
-              - Action: "iam:PassRole"
+              - Action: 'iam:PassRole'
                 Effect: Allow
                 Resource: !GetAtt ECSTaskExecutionRole.Arn
 
@@ -160,12 +160,12 @@ Resources:
       RoleName: !Ref ECSTaskExecutionRoleName
       AssumeRolePolicyDocument:
         Statement:
-        - Effect: Allow
-          Principal:
-            Service: 
-              - ecs-tasks.amazonaws.com
-          Action:
-            - 'sts:AssumeRole'
+          - Effect: Allow
+            Principal:
+              Service:
+                - ecs-tasks.amazonaws.com
+            Action:
+              - 'sts:AssumeRole'
       Path: /
       ManagedPolicyArns:
         - arn:aws:iam::aws:policy/service-role/AmazonECSTaskExecutionRolePolicy

@@ -9,28 +9,26 @@ Parameters:
     Description: Name of Auto Scaling Group
 Resources:
   NotificationTopic:
-    Type: "AWS::SNS::Topic"
+    Type: 'AWS::SNS::Topic'
     Properties:
       Subscription:
         - Endpoint: !GetAtt
             - LifecycleHandlerFunction
             - Arn
           Protocol: lambda
-    DependsOn: LifecycleHandlerFunction
   InstanceTerminatingHook:
-    Type: "AWS::AutoScaling::LifecycleHook"
+    Type: 'AWS::AutoScaling::LifecycleHook'
     Properties:
       AutoScalingGroupName: !Ref ECSAutoScalingGroupName
       DefaultResult: ABANDON
-      HeartbeatTimeout: "900"
-      LifecycleTransition: "autoscaling:EC2_INSTANCE_TERMINATING"
+      HeartbeatTimeout: '900'
+      LifecycleTransition: 'autoscaling:EC2_INSTANCE_TERMINATING'
       NotificationTargetARN: !Ref NotificationTopic
       RoleARN: !GetAtt
         - AutoscalingNotificationRole
         - Arn
-    DependsOn: NotificationTopic
   AutoscalingNotificationRole:
-    Type: "AWS::IAM::Role"
+    Type: 'AWS::IAM::Role'
     Properties:
       AssumeRolePolicyDocument:
         Version: 2012-10-17
@@ -40,11 +38,11 @@ Resources:
               Service:
                 - autoscaling.amazonaws.com
             Action:
-              - "sts:AssumeRole"
+              - 'sts:AssumeRole'
       ManagedPolicyArns:
-        - "arn:aws:iam::aws:policy/service-role/AutoScalingNotificationAccessRole"
+        - 'arn:aws:iam::aws:policy/service-role/AutoScalingNotificationAccessRole'
   LambdaExecutionRole:
-    Type: "AWS::IAM::Role"
+    Type: 'AWS::IAM::Role'
     Properties:
       Policies:
         - PolicyName: lambda-inline
@@ -53,24 +51,24 @@ Resources:
             Statement:
               - Effect: Allow
                 Action:
-                  - "autoscaling:CompleteLifecycleAction"
-                  - "logs:CreateLogGroup"
-                  - "logs:CreateLogStream"
-                  - "logs:PutLogEvents"
-                  - "ec2:DescribeInstances"
-                  - "ec2:DescribeInstanceAttribute"
-                  - "ec2:DescribeInstanceStatus"
-                  - "ec2:DescribeHosts"
-                  - "ecs:ListContainerInstances"
-                  - "ecs:SubmitContainerStateChange"
-                  - "ecs:SubmitTaskStateChange"
-                  - "ecs:DescribeContainerInstances"
-                  - "ecs:UpdateContainerInstancesState"
-                  - "ecs:ListTasks"
-                  - "ecs:DescribeTasks"
-                  - "sns:Publish"
-                  - "sns:ListSubscriptions"
-                Resource: "*"
+                  - 'autoscaling:CompleteLifecycleAction'
+                  - 'logs:CreateLogGroup'
+                  - 'logs:CreateLogStream'
+                  - 'logs:PutLogEvents'
+                  - 'ec2:DescribeInstances'
+                  - 'ec2:DescribeInstanceAttribute'
+                  - 'ec2:DescribeInstanceStatus'
+                  - 'ec2:DescribeHosts'
+                  - 'ecs:ListContainerInstances'
+                  - 'ecs:SubmitContainerStateChange'
+                  - 'ecs:SubmitTaskStateChange'
+                  - 'ecs:DescribeContainerInstances'
+                  - 'ecs:UpdateContainerInstancesState'
+                  - 'ecs:ListTasks'
+                  - 'ecs:DescribeTasks'
+                  - 'sns:Publish'
+                  - 'sns:ListSubscriptions'
+                Resource: '*'
       AssumeRolePolicyDocument:
         Version: 2012-10-17
         Statement:
@@ -79,25 +77,25 @@ Resources:
               Service:
                 - lambda.amazonaws.com
             Action:
-              - "sts:AssumeRole"
+              - 'sts:AssumeRole'
       ManagedPolicyArns:
-        - "arn:aws:iam::aws:policy/service-role/AutoScalingNotificationAccessRole"
+        - 'arn:aws:iam::aws:policy/service-role/AutoScalingNotificationAccessRole'
   LambdaInvokePermission:
-    Type: "AWS::Lambda::Permission"
+    Type: 'AWS::Lambda::Permission'
     Properties:
       FunctionName: !Ref LifecycleHandlerFunction
-      Action: "lambda:InvokeFunction"
+      Action: 'lambda:InvokeFunction'
       Principal: sns.amazonaws.com
       SourceArn: !Ref NotificationTopic
   LifecycleHandlerFunction:
-    Type: "AWS::Lambda::Function"
+    Type: 'AWS::Lambda::Function'
     Properties:
       Environment:
         Variables:
           CLUSTER: !Ref Cluster
       Code:
         ZipFile: !Join
-          - ""
+          - ''
           - - |
               import boto3,json,os,time
               ec2Client = boto3.client('ec2')

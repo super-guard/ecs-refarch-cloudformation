@@ -17,10 +17,6 @@ Parameters:
     Type: Number
     Default: 4
 
-  VPC:
-    Description: Choose which VPC this ECS cluster should be deployed to
-    Type: AWS::EC2::VPC::Id
-
   Subnets:
     Description: Choose which subnets this ECS cluster should be deployed to
     Type: List<AWS::EC2::Subnet::Id>
@@ -78,7 +74,7 @@ Resources:
         - !Ref SecurityGroup
       IamInstanceProfile: !Ref ECSInstanceProfile
       UserData:
-        "Fn::Base64": !Sub |
+        'Fn::Base64': !Sub |
           #!/bin/bash
           yum install -y https://s3.amazonaws.com/ec2-downloads-windows/SSMAgent/latest/linux_amd64/amazon-ssm-agent.rpm
           yum install -y https://s3.amazonaws.com/amazoncloudwatch-agent/amazon_linux/amd64/latest/amazon-cloudwatch-agent.rpm
@@ -128,7 +124,7 @@ Resources:
   ImageRepository:
     Type: AWS::ECR::Repository
     Properties:
-      RepositoryName: !Sub "github-actions-${EnvironmentName}"
+      RepositoryName: !Sub 'github-actions-${EnvironmentName}'
 
   # This IAM Role is attached to all of the ECS hosts. It is based on the default role
   # published here:
@@ -190,10 +186,10 @@ Resources:
     Type: AWS::IAM::Role
     Properties:
       AssumeRolePolicyDocument:
-        Version: "2012-10-17"
+        Version: '2012-10-17'
         Statement:
           Action:
-            - "sts:AssumeRole"
+            - 'sts:AssumeRole'
           Effect: Allow
           Principal:
             Service:
@@ -210,13 +206,13 @@ Resources:
                 - cloudwatch:PutMetricAlarm
                 - ecs:DescribeServices
                 - ecs:UpdateService
-              Resource: "*"
+              Resource: '*'
 
   ECSCloudWatchParameter:
     Type: AWS::SSM::Parameter
     Properties:
       Description: ECS
-      Name: !Sub "AmazonCloudWatch-${ECSCluster}-ECS"
+      Name: !Sub 'AmazonCloudWatch-${ECSCluster}-ECS'
       Type: String
       Value: !Sub |
         {

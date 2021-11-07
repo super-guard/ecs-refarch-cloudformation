@@ -67,7 +67,6 @@ Resources:
         EnvironmentName: !Ref EnvironmentName
         InstanceType: t2.large
         ClusterSize: 4
-        VPC: !GetAtt VPC.Outputs.VPC
         SecurityGroup: !GetAtt SecurityGroups.Outputs.ECSHostSecurityGroup
         Subnets: !GetAtt VPC.Outputs.PrivateSubnets
 
@@ -85,7 +84,7 @@ Outputs:
     Value: !GetAtt VPC.Outputs.VPC
     Export:
       Name: !Sub ${EnvironmentName}:VPC
-      
+
   PublicSubnets:
     Description: A comma separated list of the public subnets
     Value: !GetAtt VPC.Outputs.PublicSubnets
@@ -97,19 +96,19 @@ Outputs:
     Value: !GetAtt VPC.Outputs.PrivateSubnets
     Export:
       Name: !Sub ${EnvironmentName}:PrivateSubnets
-  
-  Cluster: 
+
+  Cluster:
     Description: The ECS Cluster ID that services should run on
     Value: !GetAtt ECS.Outputs.Cluster
     Export:
       Name: !Sub ${EnvironmentName}:Cluster
-          
-  Listener: 
+
+  Listener:
     Description: The Application Load Balancer listener to register services with
     Value: !GetAtt ALB.Outputs.Listener
     Export:
       Name: !Sub ${EnvironmentName}:Listener
-  
+
   ECSServiceAutoScalingRoleARN:
     Description: The ECS service auto scaling role ARN
     Value: !GetAtt ECS.Outputs.ECSServiceAutoScalingRole

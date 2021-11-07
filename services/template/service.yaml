@@ -7,7 +7,7 @@ Parameters:
     Type: String
     Default: production
     Description: The name of the environment to add this service to
-  
+
   VPC:
     Description: The VPC that the ECS cluster is deployed to
     Type: AWS::EC2::VPC::Id
@@ -33,7 +33,7 @@ Parameters:
   Hosts:
     Description: The host to register with the Application Load Balancer
     Type: String
-  
+
   ECSServiceAutoScalingRoleARN:
     Description: The ECS service auto scaling role ARN
     Type: String
@@ -52,7 +52,7 @@ Resources:
       DesiredCount: !Ref DesiredCount
       TaskDefinition: !Ref TaskDefinition
       LoadBalancers:
-        - ContainerName: "admin-service"
+        - ContainerName: 'admin-service'
           ContainerPort: 8000
           TargetGroupArn: !Ref TargetGroup
 
@@ -103,7 +103,7 @@ Resources:
       Conditions:
         - Field: host-header
           HostHeaderConfig:
-            Values: !Split [",", !Ref Hosts]
+            Values: !Split [',', !Ref Hosts]
       Actions:
         - TargetGroupArn: !Ref TargetGroup
           Type: forward
@@ -128,30 +128,30 @@ Resources:
         - PolicyName: !Sub ecs-service-${AWS::StackName}
           PolicyDocument:
             {
-              "Version": "2012-10-17",
-              "Statement":
+              'Version': '2012-10-17',
+              'Statement':
                 [
                   {
-                    "Effect": "Allow",
-                    "Action":
+                    'Effect': 'Allow',
+                    'Action':
                       [
-                        "ec2:AuthorizeSecurityGroupIngress",
-                        "ec2:Describe*",
-                        "elasticloadbalancing:DeregisterInstancesFromLoadBalancer",
-                        "elasticloadbalancing:Describe*",
-                        "elasticloadbalancing:RegisterInstancesWithLoadBalancer",
-                        "elasticloadbalancing:DeregisterTargets",
-                        "elasticloadbalancing:DescribeTargetGroups",
-                        "elasticloadbalancing:DescribeTargetHealth",
-                        "elasticloadbalancing:RegisterTargets"
+                        'ec2:AuthorizeSecurityGroupIngress',
+                        'ec2:Describe*',
+                        'elasticloadbalancing:DeregisterInstancesFromLoadBalancer',
+                        'elasticloadbalancing:Describe*',
+                        'elasticloadbalancing:RegisterInstancesWithLoadBalancer',
+                        'elasticloadbalancing:DeregisterTargets',
+                        'elasticloadbalancing:DescribeTargetGroups',
+                        'elasticloadbalancing:DescribeTargetHealth',
+                        'elasticloadbalancing:RegisterTargets',
                       ],
-                    "Resource": "*"
-                  }
-                ]
+                    'Resource': '*',
+                  },
+                ],
             }
 
   ServiceScalableTarget:
-    Type: "AWS::ApplicationAutoScaling::ScalableTarget"
+    Type: 'AWS::ApplicationAutoScaling::ScalableTarget'
     Properties:
       MaxCapacity: !Ref MaxCount
       MinCapacity: !Ref DesiredCount
@@ -165,7 +165,7 @@ Resources:
       ServiceNamespace: ecs
 
   ServiceScaleOutPolicy:
-    Type: "AWS::ApplicationAutoScaling::ScalingPolicy"
+    Type: 'AWS::ApplicationAutoScaling::ScalingPolicy'
     Properties:
       PolicyName: ServiceScaleOutPolicy
       PolicyType: StepScaling
@@ -179,7 +179,7 @@ Resources:
             ScalingAdjustment: 1
 
   ServiceScaleInPolicy:
-    Type: "AWS::ApplicationAutoScaling::ScalingPolicy"
+    Type: 'AWS::ApplicationAutoScaling::ScalingPolicy'
     Properties:
       PolicyName: ServiceScaleInPolicy
       PolicyType: StepScaling
@@ -205,9 +205,9 @@ Resources:
         - Name: ServiceName
           Value: !GetAtt Service.Name
       Statistic: Maximum
-      Period: "60"
-      EvaluationPeriods: "3"
-      Threshold: "90"
+      Period: '60'
+      EvaluationPeriods: '3'
+      Threshold: '90'
       ComparisonOperator: GreaterThanThreshold
       AlarmActions:
         - !Ref ServiceScaleOutPolicy
@@ -225,9 +225,9 @@ Resources:
         - Name: ServiceName
           Value: !GetAtt Service.Name
       Statistic: Maximum
-      Period: "60"
-      EvaluationPeriods: "10"
-      Threshold: "70"
+      Period: '60'
+      EvaluationPeriods: '10'
+      Threshold: '70'
       ComparisonOperator: LessThanThreshold
       AlarmActions:
         - !Ref ServiceScaleInPolicy

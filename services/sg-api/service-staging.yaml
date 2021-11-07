@@ -195,7 +195,7 @@ Resources:
           Type: forward
 
   MongoDBEndpoint:
-    Type: 'AWS::EC2::VPCEndpoint'
+    Type: AWS::EC2::VPCEndpoint
     Properties:
       VpcEndpointType: Interface
       ServiceName: !Sub
@@ -203,24 +203,10 @@ Resources:
         - SecretArn:
             Fn::ImportValue: !Sub '${EnvironmentName}:APISecretArn'
       VpcId:
-        Fn::ImportValue:
-          !Sub ${EnvironmentName}:VPC
-      SubnetIds:
-        !Split
-          - ","
-          - Fn::ImportValue:
-              !Sub ${EnvironmentName}:PrivateSubnets
-      PolicyDocument:
-        Version: '2012-10-17'
-        Statement:
-          - Effect: Allow
-            Principal: '*'
-            Action:
-              - 's3:GetObject'
-            Resource:
-              - 'arn:aws:s3:::examplebucket/*'
-
-
+        Fn::ImportValue: !Sub ${EnvironmentName}:VPC
+      SubnetIds: !Split
+        - ','
+        - Fn::ImportValue: !Sub ${EnvironmentName}:PrivateSubnets
 
   # This IAM Role grants the service access to register/unregister with the
   # Application Load Balancer (ALB). It is based on the default documented here:
