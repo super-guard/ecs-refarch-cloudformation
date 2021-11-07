@@ -4,59 +4,56 @@ Description: >
 Parameters:
   EnvironmentName:
     Type: String
-    Default: production
     Description: The name of the environment to add this service to
+    Default: superguard-production
 
   EnvPort:
     Type: String
-    Default: 8001
     Description: The port to expose the service on
+    Default: 8001
 
   EnvApiBaseUrl:
     Type: String
-    Default: https://api-dev.superguard.com.au
     Description: The base url this service is hosted on
+    Default: https://api.superguard.com.au
 
   EnvAppBaseUrl:
     Type: String
-    Default: https://app-dev.superguard.com.au
     Description: The base url the user facing app is hosted on
+    Default: https://app.superguard.com.au
 
   EnvAdminBaseUrl:
     Type: String
-    Default: https://portal-dev.superguard.com.au
     Description: The base url the admin portal is hosted on
+    Default: https://portal.superguard.com.au
 
   EnvRedisHost:
     Type: String
-    Default: localhost
     Description: The host for the Redis service
+    Default: localhost
 
   EnvRedisPort:
     Type: String
-    Default: 6379
     Description: The port to access the Redis service
+    Default: 6379
 
   EnvFaceTecApiBaseUrl:
     Type: String
     Description: The base url to access the FaceTec Standard Server API
 
   DesiredCount:
-    Description: How many instances of this task should we run across our cluster?
     Type: Number
+    Description: How many instances of this task should we run across our cluster?
     Default: 2
 
   Hosts:
-    Description: The host to register with the Application Load Balancer
     Type: String
+    Description: The hosts (comma separated) to register with the Application Load Balancer
+    Default: api.superguard.com.au,
 
   ImageUrl:
+    Type: String
     Description: The Docker image url to deploy for this service
-    Type: String
-  
-  MongoVPCEServiceName:
-    Description: The service name to use for the MongoDB VPC endpoint
-    Type: String
 
 Resources:
   Service:
@@ -201,7 +198,10 @@ Resources:
     Type: 'AWS::EC2::VPCEndpoint'
     Properties:
       VpcEndpointType: Interface
-      ServiceName: !Ref MongoVPCEServiceName
+      ServiceName: !Sub
+        - '{{resolve:secretsmanager:${SecretArn}:SecretString:MONGO_VPCE_SERVICE_NAME}}'
+        - SecretArn:
+            Fn::ImportValue: !Sub '${EnvironmentName}:APISecretArn'
       VpcId:
         Fn::ImportValue:
           !Sub ${EnvironmentName}:VPC
