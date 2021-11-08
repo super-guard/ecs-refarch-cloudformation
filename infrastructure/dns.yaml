@@ -16,25 +16,6 @@ Resources:
         Comment: 'Main SuperGuard DNS hosted zone'
       Name: !Ref HostedZoneName
 
-  NSRecords:
-    Type: AWS::Route53::RecordSetGroup
-    Properties:
-      HostedZoneId: !Ref Zone
-      RecordSets:
-        - Name: !Ref HostedZoneName
-          Type: NS
-          ResourceRecords:
-            - 'ns-2046.awsdns-63.co.uk.'
-            - 'ns-1429.awsdns-50.org.'
-            - 'ns-575.awsdns-07.net.'
-            - 'ns-87.awsdns-10.com.'
-          TTL: 172800
-        - Name: !Ref HostedZoneName
-          Type: SOA
-          ResourceRecords:
-            - 'ns-2046.awsdns-63.co.uk. awsdns-hostmaster.amazon.com. 1 7200 900 1209600 86400'
-          TTL: 900
-
   WixRecords:
     Type: AWS::Route53::RecordSetGroup
     Properties:
