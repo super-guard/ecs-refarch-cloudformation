@@ -16,6 +16,7 @@ Parameters:
       - 'true'
       - 'false'
     Description: If true, will add a record to map all the subdomains to the ALB in addition to the top level domain
+    Default: 'false'
 
 Conditions:
   ShouldAddWildcardSubdomains: !Equals

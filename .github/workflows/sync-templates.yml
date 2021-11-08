@@ -26,11 +26,10 @@ defaults:
     shell: bash
 
 jobs:
-  deploy:
-    name: Deploy
+  sync:
+    name: Sync Templates
     runs-on: ubuntu-latest
-    timeout-minutes: 10
-
+    timeout-minutes: 5
     steps:
       - name: Checkout
         uses: actions/checkout@v2
@@ -49,6 +48,12 @@ jobs:
         env:
           AWS_S3_BUCKET: ${{ env.CLOUDFORMATION_TEMPLATES_S3_BUCKET }}
 
+  deploy:
+    name: Deploy base infrastructure
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    needs: [sync]
+    steps:
       - name: Deploy the base infra layer using CFN
         id: setup-base-layer
         uses: aws-actions/aws-cloudformation-github-deploy@v1
