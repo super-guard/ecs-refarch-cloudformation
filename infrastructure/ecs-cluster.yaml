@@ -15,6 +15,11 @@ Parameters:
   ClusterSize:
     Description: How many ECS hosts do you want to initially deploy?
     Type: Number
+    Default: 2
+
+  MaxClusterSize:
+    Description: How many ECS hosts do you want to initially deploy?
+    Type: Number
     Default: 4
 
   Subnets:
@@ -43,7 +48,7 @@ Resources:
       VPCZoneIdentifier: !Ref Subnets
       LaunchConfigurationName: !Ref ECSLaunchConfiguration
       MinSize: !Ref ClusterSize
-      MaxSize: !Ref ClusterSize
+      MaxSize: !Ref MaxClusterSize
       DesiredCapacity: !Ref ClusterSize
       Tags:
         - Key: Name

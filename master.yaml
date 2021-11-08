@@ -65,8 +65,9 @@ Resources:
       TemplateURL: !Sub https://${S3Bucket}.s3.${S3Region}.amazonaws.com/infrastructure/ecs-cluster.yaml
       Parameters:
         EnvironmentName: !Ref EnvironmentName
-        InstanceType: t2.large
-        ClusterSize: 4
+        InstanceType: t2.medium
+        ClusterSize: 2
+        MaxClusterSize: 4
         SecurityGroup: !GetAtt SecurityGroups.Outputs.ECSHostSecurityGroup
         Subnets: !GetAtt VPC.Outputs.PrivateSubnets
 
