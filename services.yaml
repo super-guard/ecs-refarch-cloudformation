@@ -67,7 +67,7 @@ Resources:
         Subnets: !GetAtt VPC.Outputs.PublicSubnets
         SecurityGroup: !GetAtt SecurityGroups.Outputs.LoadBalancerSecurityGroup
         SSLCert:
-          Fn::ImportValue: !Sub ${EnvironmentName}:TopLevelSSLCert
+          Fn::ImportValue: SuperGuardDomainCertificate
 
   ECS:
     Type: AWS::CloudFormation::Stack

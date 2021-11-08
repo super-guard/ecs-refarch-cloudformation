@@ -26,8 +26,7 @@ Resources:
   Record:
     Type: AWS::Route53::RecordSetGroup
     Properties:
-      HostedZoneId:
-        Fn::ImportValue: !Sub ${EnvironmentName}:TopLevelZone
+      HostedZoneId: !ImportValue SuperGuardHostedZone
       RecordSets:
         - Name: !Ref Domain
           Type: A
@@ -42,8 +41,7 @@ Resources:
     Type: AWS::Route53::RecordSetGroup
     Condition: ShouldAddWildcardSubdomains
     Properties:
-      HostedZoneId:
-        Fn::ImportValue: !Sub ${EnvironmentName}:TopLevelZone
+      HostedZoneId: !ImportValue SuperGuardHostedZone
       RecordSets:
         - Name: !Sub '*.${Domain}'
           Type: A
