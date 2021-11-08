@@ -73,6 +73,7 @@ Resources:
         VPC: !GetAtt VPC.Outputs.VPC
         Subnets: !GetAtt VPC.Outputs.PublicSubnets
         SecurityGroup: !GetAtt SecurityGroups.Outputs.LoadBalancerSecurityGroup
+        SSLCert: !GetAtt TopLevelSSL.Outputs.SSLCert
 
   ECS:
     Type: AWS::CloudFormation::Stack
