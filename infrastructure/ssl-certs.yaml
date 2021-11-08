@@ -14,15 +14,13 @@ Resources:
   TopLevelSSL:
     Type: AWS::CertificateManager::Certificate
     Properties:
-      CertificateAuthorityArn: String
-      CertificateTransparencyLoggingPreference: String
       DomainName: !Ref Domain
+      ValidationMethod: DNS
       DomainValidationOptions:
         - DomainName: !Ref Domain
           HostedZoneId: !Ref HostedZone
       SubjectAlternativeNames:
         - !Sub '*.${Domain}'
-      ValidationMethod: DNS
 
 Outputs:
   SSLCert:
