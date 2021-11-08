@@ -29,14 +29,6 @@ Parameters:
     Default: ap-southeast-2
 
 Resources:
-  BaseLayer:
-    Type: AWS::CloudFormation::Stack
-    Properties:
-      TemplateURL: !Sub https://${S3Bucket}.s3.${S3Region}.amazonaws.com/base-layer.yaml
-      Parameters:
-        S3Bucket: !Ref S3Bucket
-        S3Region: !Ref S3Region
-
   VPC:
     Type: AWS::CloudFormation::Stack
     Properties:
