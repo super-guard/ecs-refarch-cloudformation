@@ -16,7 +16,7 @@ Parameters:
   EnvironmentName:
     Type: String
     Default: production
-    Description: The name of the environment to add this load balancer to
+    Description: The name of the environment this stack is being deployed for
 
   S3Bucket:
     Type: String
@@ -29,6 +29,23 @@ Parameters:
     Default: ap-southeast-2
 
 Resources:
+  TopLevelDNS:
+    Type: AWS::CloudFormation::Stack
+    Properties:
+      TemplateURL: !Sub https://${S3Bucket}.s3.${S3Region}.amazonaws.com/infrastructure/dns.yaml
+      Parameters:
+        EnvironmentName: !Ref EnvironmentName
+        HostedZoneName: superguard.com.au
+
+  TopLevelSSL:
+    Type: AWS::CloudFormation::Stack
+    Properties:
+      TemplateURL: !Sub https://${S3Bucket}.s3.${S3Region}.amazonaws.com/infrastructure/ssl-certs.yaml
+      Parameters:
+        EnvironmentName: !Ref EnvironmentName
+        Domain: superguard.com.au
+        HostedZone: !GetAtt TopLevelDNS.Outputs.HostedZone
+
   VPC:
     Type: AWS::CloudFormation::Stack
     Properties:
@@ -80,6 +97,18 @@ Resources:
         ECSAutoScalingGroupName: !GetAtt ECS.Outputs.ECSAutoScalingGroupName
 
 Outputs:
+  TopLevelZone:
+    Description: The ID of the top level hosted zone that this stack is deployed in
+    Value: !GetAtt TopLevelDNS.Outputs.HostedZone
+    Export:
+      Name: !Sub ${EnvironmentName}:TopLevelZone
+
+  TopLevelSSLCert:
+    Description: The Arn of the SSL cert associated with the top level hosted zone
+    Value: !GetAtt TopLevelSSL.Outputs.SSLCert
+    Export:
+      Name: !Sub ${EnvironmentName}:TopLevelSSLCert
+
   VPC:
     Description: The ID of the VPC that this stack is deployed in
     Value: !GetAtt VPC.Outputs.VPC

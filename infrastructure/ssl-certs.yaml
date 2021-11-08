@@ -1,0 +1,30 @@
+Description: >
+  This template creates and verifies all the top level SSL certificates used throughout our services.
+
+Parameters:
+  Domain:
+    Type: String
+    Description: The domain we're registering the SSL certs for
+
+  HostedZone:
+    Type: String
+    Description: The ID fo the hosted zone to use for SSL validation
+
+Resources:
+  TopLevelSSL:
+    Type: AWS::CertificateManager::Certificate
+    Properties:
+      CertificateAuthorityArn: String
+      CertificateTransparencyLoggingPreference: String
+      DomainName: !Ref Domain
+      DomainValidationOptions:
+        - DomainName: !Ref Domain
+          HostedZoneId: !Ref HostedZone
+      SubjectAlternativeNames:
+        - !Sub '*.${Domain}'
+      ValidationMethod: DNS
+
+Outputs:
+  SSLCert:
+    Description: The ARN of the SSL cert zone for the requested Domain
+    Value: !Ref TopLevelSSL

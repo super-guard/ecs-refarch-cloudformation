@@ -1,0 +1,88 @@
+Description: >
+  This template deploys the base Route 53 DNS configuration that exposes our various services.
+  Each service can use the `AWS::Route53::RecordSetGroup` to add their own records to the hosted zone
+
+Parameters:
+  HostedZoneName:
+    Type: String
+    Description: The name of the hosted zone within which the entries need to be created
+    Default: superguard.com.au
+
+Resources:
+  Zone:
+    Type: AWS::Route53::HostedZone
+    Properties:
+      HostedZoneConfig:
+        Comment: 'Main SuperGuard DNS hosted zone'
+      Name: !Ref HostedZoneName
+
+  NSRecords:
+    Type: AWS::Route53::RecordSetGroup
+    Properties:
+      HostedZoneName: !Ref HostedZoneName
+      RecordSets:
+        - Name: !Ref HostedZoneName
+          Type: NS
+          ResourceRecords:
+            - 'ns-2046.awsdns-63.co.uk.'
+            - 'ns-1429.awsdns-50.org.'
+            - 'ns-575.awsdns-07.net.'
+            - 'ns-87.awsdns-10.com.'
+          TTL: 172800
+        - Name: !Ref HostedZoneName
+          Type: SOA
+          ResourceRecords:
+            - 'ns-2046.awsdns-63.co.uk. awsdns-hostmaster.amazon.com. 1 7200 900 1209600 86400'
+          TTL: 900
+
+  WixRecords:
+    Type: AWS::Route53::RecordSetGroup
+    Properties:
+      HostedZoneName: !Ref HostedZoneName
+      RecordSets:
+        - Name: !Ref HostedZoneName
+          Type: A
+          ResourceRecords:
+            - '23.236.62.147'
+          TTL: 600
+        - Name: !Sub _domainconnect.${HostedZoneName}
+          Type: CNAME
+          ResourceRecords:
+            - '_domainconnect.gd.domaincontrol.com'
+          TTL: 3600
+        - Name: !Sub www.${HostedZoneName}
+          Type: CNAME
+          ResourceRecords:
+            - 'www154.wixdns.net'
+          TTL: 3600
+
+  MailServerRecords:
+    Type: AWS::Route53::RecordSetGroup
+    Properties:
+      HostedZoneName: !Ref HostedZoneName
+      RecordSets:
+        - Name: !Ref HostedZoneName
+          Type: MX
+          ResourceRecords:
+            - '1 aspmx.l.google.com'
+            - '5 alt1.aspmx.l.google.com'
+            - '5 alt2.aspmx.l.google.com'
+            - '10 alt3.aspmx.l.google.com'
+            - '10 alt4.aspmx.l.google.com'
+          TTL: 3600
+        - Name: !Ref HostedZoneName
+          Type: TXT
+          ResourceRecords:
+            - '"google-site-verification=-X8eDq-mos9861eG36Kw7TQ-1E9pXK_SFMyEDMPB7w0"'
+            - '"v=spf1 include:dc-aa8e722993._spfm.superguard.com.au ~all"'
+          TTL: 3600
+        - Name: !Sub dc-aa8e722993._spfm.${HostedZoneName}
+          Type: TXT
+          ResourceRecords:
+            - '"v=spf1 include:_spf.google.com ~all"'
+          TTL: 3600
+
+Outputs:
+  HostedZone:
+    Description: The ID of the main hosted zone for this environment
+    Value: !Ref Zone

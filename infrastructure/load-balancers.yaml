@@ -19,6 +19,10 @@ Parameters:
     Description: Select the Security Group to apply to the Application Load Balancer
     Type: AWS::EC2::SecurityGroup::Id
 
+  SSLCert:
+    Description: Select the SSL Certificate ARN to associate with the LoadBalancer
+    Type: String
+
 Resources:
   LoadBalancer:
     Type: AWS::ElasticLoadBalancingV2::LoadBalancer
@@ -31,12 +35,30 @@ Resources:
         - Key: Name
           Value: !Ref EnvironmentName
 
-  LoadBalancerListener:
+  HTTPlistener:
+    Type: AWS::ElasticLoadBalancingV2::Listener
+    Properties:
+      DefaultActions:
+        - Type: 'redirect'
+          RedirectConfig:
+            Protocol: 'HTTPS'
+            Port: 443
+            Host: '#{host}'
+            Path: '/#{path}'
+            Query: '#{query}'
+            StatusCode: 'HTTP_301'
+      LoadBalancerArn: !Ref LoadBalancer
+      Port: 80
+      Protocol: 'HTTP'
+
+  HTTPSListener:
     Type: AWS::ElasticLoadBalancingV2::Listener
     Properties:
       LoadBalancerArn: !Ref LoadBalancer
-      Port: 80
-      Protocol: HTTP
+      Port: 443
+      Protocol: HTTPS
+      Certificates:
+        - CertificateArn: !Ref SSLCert
       DefaultActions:
         - Type: forward
           TargetGroupArn: !Ref DefaultTargetGroup
@@ -63,4 +85,4 @@ Outputs:
 
   Listener:
     Description: A reference to a port 80 listener
-    Value: !Ref LoadBalancerListener
+    Value: !Ref HTTPSListener
