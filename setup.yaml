@@ -43,6 +43,8 @@ Resources:
               - 'lambda:*'
               - 'autoscaling:*'
               - 'elasticloadbalancing:*'
+              - 'route53:*'
+              - 'acm:*'
             Effect: Allow
             Resource: '*'
           - Action:
