@@ -51,4 +51,3 @@ Resources:
               Fn::ImportValue: !Sub ${EnvironmentName}:LoadBalancerUrl
             HostedZoneId:
               Fn::ImportValue: !Sub ${EnvironmentName}:LoadBalancerHostedZone
-          TTL: 600
