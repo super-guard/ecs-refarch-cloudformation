@@ -102,11 +102,11 @@ Resources:
             Effect: Allow
             Resource: !Sub 'arn:${AWS::Partition}:secretsmanager:*:${AWS::AccountId}:secret:superguard-*'
           - Action:
-              - 's3:ListBucket'
+              - 's3:*'
             Effect: Allow
             Resource: !Sub 'arn:aws:s3:::${S3Bucket}'
           - Action:
-              - 's3:GetObject'
+              - 's3:*'
             Effect: Allow
             Resource: !Sub 'arn:aws:s3:::${S3Bucket}/*'
 
