@@ -46,6 +46,8 @@ jobs:
         uses: jakejarvis/s3-sync-action@master
         with:
           args: --follow-symlinks --delete --exclude '.git/*'
+        env:
+          AWS_S3_BUCKET: ${{ env.CLOUDFORMATION_TEMPLATES_S3_BUCKET }}
 
       - name: Deploy the base infra layer using CFN
         id: setup-base-layer
