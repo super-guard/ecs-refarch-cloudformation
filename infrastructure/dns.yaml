@@ -19,7 +19,7 @@ Resources:
   NSRecords:
     Type: AWS::Route53::RecordSetGroup
     Properties:
-      HostedZoneName: !Ref HostedZoneName
+      HostedZoneId: !Ref Zone
       RecordSets:
         - Name: !Ref HostedZoneName
           Type: NS
@@ -38,7 +38,7 @@ Resources:
   WixRecords:
     Type: AWS::Route53::RecordSetGroup
     Properties:
-      HostedZoneName: !Ref HostedZoneName
+      HostedZoneId: !Ref Zone
       RecordSets:
         - Name: !Ref HostedZoneName
           Type: A
@@ -59,7 +59,7 @@ Resources:
   MailServerRecords:
     Type: AWS::Route53::RecordSetGroup
     Properties:
-      HostedZoneName: !Ref HostedZoneName
+      HostedZoneId: !Ref Zone
       RecordSets:
         - Name: !Ref HostedZoneName
           Type: MX
