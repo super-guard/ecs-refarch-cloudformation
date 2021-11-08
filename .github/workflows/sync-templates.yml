@@ -1,4 +1,4 @@
-name: Sync Cloudformation Templates
+name: Sync Cloudformation Templates + Base Layer
 
 on:
   push:
@@ -15,11 +15,11 @@ on:
   workflow_dispatch:
 
 env:
-  AWS_REGION: ap-southeast-2
-  AWS_S3_BUCKET: superguard-ecs-cloudformation
-
   AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
   AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+
+  CLOUDFORMATION_TEMPLATES_S3_BUCKET: superguard-ecs-cloudformation
+  CLOUDFORMATION_TEMPLATES_S3_REGION: ap-southeast-2
 
 defaults:
   run:
@@ -30,7 +30,7 @@ jobs:
     name: Deploy
     runs-on: ubuntu-latest
     timeout-minutes: 10
-    
+
     steps:
       - name: Checkout
         uses: actions/checkout@v2
@@ -40,11 +40,21 @@ jobs:
         with:
           aws-access-key-id: ${{ env.AWS_ACCESS_KEY_ID }}
           aws-secret-access-key: ${{ env.AWS_SECRET_ACCESS_KEY }}
-          aws-region: ${{ env.AWS_REGION }}
+          aws-region: ${{ env.CLOUDFORMATION_TEMPLATES_S3_REGION }}
 
       - name: Sync Templates to S3
         uses: jakejarvis/s3-sync-action@master
         with:
           args: --follow-symlinks --delete --exclude '.git/*'
 
-      
+      - name: Deploy the base infra layer using CFN
+        id: setup-base-layer
+        uses: aws-actions/aws-cloudformation-github-deploy@v1
+        with:
+          name: sg-base-infrastructure
+          template: https://${{ env.CLOUDFORMATION_TEMPLATES_S3_BUCKET }}.s3.${{ env.CLOUDFORMATION_TEMPLATES_S3_REGION }}.amazonaws.com/services/sg-api/mongo-vpce.yaml
+          capabilities: 'CAPABILITY_NAMED_IAM'
+          no-fail-on-empty-changeset: '1'
+          parameter-overrides: >-
+            S3Bucket=${{ env.CLOUDFORMATION_TEMPLATES_S3_BUCKET }},
+            S3Region=${{ env.CLOUDFORMATION_TEMPLATES_S3_REGION }}

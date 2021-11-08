@@ -29,20 +29,13 @@ Parameters:
     Default: ap-southeast-2
 
 Resources:
-  TopLevelDNS:
+  BaseLayer:
     Type: AWS::CloudFormation::Stack
     Properties:
-      TemplateURL: !Sub https://${S3Bucket}.s3.${S3Region}.amazonaws.com/infrastructure/dns.yaml
+      TemplateURL: !Sub https://${S3Bucket}.s3.${S3Region}.amazonaws.com/base-layer.yaml
       Parameters:
-        HostedZoneName: superguard.com.au
-
-  TopLevelSSL:
-    Type: AWS::CloudFormation::Stack
-    Properties:
-      TemplateURL: !Sub https://${S3Bucket}.s3.${S3Region}.amazonaws.com/infrastructure/ssl-certs.yaml
-      Parameters:
-        Domain: superguard.com.au
-        HostedZone: !GetAtt TopLevelDNS.Outputs.HostedZone
+        S3Bucket: !Ref S3Bucket
+        S3Region: !Ref S3Region
 
   VPC:
     Type: AWS::CloudFormation::Stack
@@ -73,7 +66,8 @@ Resources:
         VPC: !GetAtt VPC.Outputs.VPC
         Subnets: !GetAtt VPC.Outputs.PublicSubnets
         SecurityGroup: !GetAtt SecurityGroups.Outputs.LoadBalancerSecurityGroup
-        SSLCert: !GetAtt TopLevelSSL.Outputs.SSLCert
+        SSLCert:
+          Fn::ImportValue: !Sub ${EnvironmentName}:TopLevelSSLCert
 
   ECS:
     Type: AWS::CloudFormation::Stack
@@ -96,18 +90,6 @@ Resources:
         ECSAutoScalingGroupName: !GetAtt ECS.Outputs.ECSAutoScalingGroupName
 
 Outputs:
-  TopLevelZone:
-    Description: The ID of the top level hosted zone that this stack is deployed in
-    Value: !GetAtt TopLevelDNS.Outputs.HostedZone
-    Export:
-      Name: !Sub ${EnvironmentName}:TopLevelZone
-
-  TopLevelSSLCert:
-    Description: The Arn of the SSL cert associated with the top level hosted zone
-    Value: !GetAtt TopLevelSSL.Outputs.SSLCert
-    Export:
-      Name: !Sub ${EnvironmentName}:TopLevelSSLCert
-
   VPC:
     Description: The ID of the VPC that this stack is deployed in
     Value: !GetAtt VPC.Outputs.VPC
@@ -137,6 +119,18 @@ Outputs:
     Value: !GetAtt ALB.Outputs.Listener
     Export:
       Name: !Sub ${EnvironmentName}:Listener
+
+  LoadBalancerUrl:
+    Description: The Application Load Balancer DNS url
+    Value: !GetAtt ALB.Outputs.LoadBalancerUrl
+    Export:
+      Name: !Sub ${EnvironmentName}:LoadBalancerUrl
+
+  LoadBalancerHostedZone:
+    Description: The Application Load Balancer Hosted DNS Zone
+    Value: !GetAtt ALB.Outputs.LoadBalancerHostedZone
+    Export:
+      Name: !Sub ${EnvironmentName}:LoadBalancerHostedZone
 
   ECSServiceAutoScalingRoleARN:
     Description: The ECS service auto scaling role ARN

@@ -1,0 +1,55 @@
+Description: >
+  These are the DNS entries that serve the core SuperGuard API
+
+Parameters:
+  EnvironmentName:
+    Type: String
+    Description: The name of the environment to add these entries to
+
+  Domain:
+    Type: String
+    Description: The DNS name to add
+
+  AllSubdomains:
+    Type: String
+    AllowedValues:
+      - 'true'
+      - 'false'
+    Description: If true, will add a record to map all the subdomains to the ALB in addition to the top level domain
+
+Conditions:
+  ShouldAddWildcardSubdomains: !Equals
+    - !Ref AllSubdomains
+    - 'true'
+
+Resources:
+  Record:
+    Type: AWS::Route53::RecordSetGroup
+    Properties:
+      HostedZoneId:
+        Fn::ImportValue: !Sub ${EnvironmentName}:TopLevelZone
+      RecordSets:
+        - Name: !Ref Domain
+          Type: A
+          AliasTarget:
+            DNSName:
+              Fn::ImportValue: !Sub ${EnvironmentName}:LoadBalancerUrl
+            HostedZoneId:
+              Fn::ImportValue: !Sub ${EnvironmentName}:LoadBalancerHostedZone
+          TTL: 600
+
+  WildcardRecord:
+    Type: AWS::Route53::RecordSetGroup
+    Condition: ShouldAddWildcardSubdomains
+    Properties:
+      HostedZoneId:
+        Fn::ImportValue: !Sub ${EnvironmentName}:TopLevelZone
+      RecordSets:
+        - Name: !Sub '*.${Domain}'
+          Type: A
+          AliasTarget:
+            DNSName:
+              Fn::ImportValue: !Sub ${EnvironmentName}:LoadBalancerUrl
+            HostedZoneId:
+              Fn::ImportValue: !Sub ${EnvironmentName}:LoadBalancerHostedZone
+          TTL: 600

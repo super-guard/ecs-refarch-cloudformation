@@ -1,0 +1,42 @@
+Description: >
+  This template deploys the base Route 53 DNS and SSL configurations
+
+Parameters:
+  S3Bucket:
+    Type: String
+    Description: Please provide the S3 Bucket to find the Cloudformation yaml files
+    Default: superguard-ecs-cloudformation
+
+  S3Region:
+    Type: String
+    Description: Please provide the S3 region hosting the S3 bucket
+    Default: ap-southeast-2
+
+Resources:
+  TopLevelDNS:
+    Type: AWS::CloudFormation::Stack
+    Properties:
+      TemplateURL: !Sub https://${S3Bucket}.s3.${S3Region}.amazonaws.com/infrastructure/dns.yaml
+      Parameters:
+        HostedZoneName: superguard.com.au
+
+  TopLevelSSL:
+    Type: AWS::CloudFormation::Stack
+    Properties:
+      TemplateURL: !Sub https://${S3Bucket}.s3.${S3Region}.amazonaws.com/infrastructure/ssl-certs.yaml
+      Parameters:
+        Domain: superguard.com.au
+        HostedZone: !GetAtt TopLevelDNS.Outputs.HostedZone
+
+Outputs:
+  TopLevelZone:
+    Description: The ID of the top level hosted zone that this stack is deployed in
+    Value: !GetAtt TopLevelDNS.Outputs.HostedZone
+    Export:
+      Name: SuperGuardHostedZone
+
+  TopLevelSSLCert:
+    Description: The Arn of the SSL cert associated with the top level hosted zone
+    Value: !GetAtt TopLevelSSL.Outputs.SSLCert
+    Export:
+      Name: SuperGuardDomainCertificate
