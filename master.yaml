@@ -34,7 +34,6 @@ Resources:
     Properties:
       TemplateURL: !Sub https://${S3Bucket}.s3.${S3Region}.amazonaws.com/infrastructure/dns.yaml
       Parameters:
-        EnvironmentName: !Ref EnvironmentName
         HostedZoneName: superguard.com.au
 
   TopLevelSSL:
@@ -42,7 +41,6 @@ Resources:
     Properties:
       TemplateURL: !Sub https://${S3Bucket}.s3.${S3Region}.amazonaws.com/infrastructure/ssl-certs.yaml
       Parameters:
-        EnvironmentName: !Ref EnvironmentName
         Domain: superguard.com.au
         HostedZone: !GetAtt TopLevelDNS.Outputs.HostedZone
 
