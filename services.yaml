@@ -68,7 +68,7 @@ Resources:
       Parameters:
         EnvironmentName: !Ref EnvironmentName
         InstanceType: t2.medium
-        ClusterSize: 2
+        ClusterSize: 1
         MaxClusterSize: 4
         SecurityGroup: !GetAtt SecurityGroups.Outputs.ECSHostSecurityGroup
         Subnets: !GetAtt VPC.Outputs.PrivateSubnets
