@@ -41,6 +41,11 @@ Resources:
     Properties:
       ClusterName: !Ref EnvironmentName
 
+  FaceTecCluster:
+    Type: AWS::ECS::Cluster
+    Properties:
+      ClusterName: !Sub ${EnvironmentName}-facetec
+
   ECSAutoScalingGroup:
     DependsOn: ECSCluster
     Type: AWS::AutoScaling::AutoScalingGroup
@@ -303,6 +308,10 @@ Outputs:
   Cluster:
     Description: A reference to the ECS cluster
     Value: !Ref ECSCluster
+
+  FaceTecCluster:
+    Description: A reference to the facetec ECS cluster
+    Value: !Ref FaceTecCluster
 
   ECSServiceAutoScalingRole:
     Description: A reference to ECS service auto scaling role

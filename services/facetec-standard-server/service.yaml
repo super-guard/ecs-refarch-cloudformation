@@ -1,0 +1,101 @@
+Description: >
+  This is the ECS service that serves the FaceTec Standard Server API
+
+Parameters:
+  EnvironmentName:
+    Type: String
+    Description: The name of the environment to add this service to
+    Default: superguard-production
+
+  EnvPort:
+    Type: String
+    Description: The port to expose the service on
+    Default: 8080
+
+  DesiredCount:
+    Type: Number
+    Description: How many instances of this task should we run across our cluster?
+    Default: 1
+
+  ImageUrl:
+    Type: String
+    Description: The Docker image url to deploy for this service
+
+Resources:
+  Service:
+    Type: AWS::ECS::Service
+    Properties:
+      Cluster:
+        Fn::ImportValue: !Sub ${EnvironmentName}:Cluster
+      Role: !Ref ServiceRole
+      DesiredCount: !Ref DesiredCount
+      TaskDefinition: !Ref TaskDefinition
+
+  TaskDefinition:
+    Type: AWS::ECS::TaskDefinition
+    Properties:
+      Family: api-service
+      ExecutionRoleArn: !GetAtt ServiceRole.Arn
+      ContainerDefinitions:
+        - Name: facetec-standard-server
+          Essential: true
+          Image: !Ref ImageUrl
+          Memory: 16000
+          PortMappings:
+            - ContainerPort: !Ref EnvPort
+            - HostPort: !Ref EnvPort
+          LogConfiguration:
+            LogDriver: awslogs
+            Options:
+              awslogs-group: !Ref CloudWatchLogsGroup
+              awslogs-region: !Ref AWS::Region
+
+  CloudWatchLogsGroup:
+    Type: AWS::Logs::LogGroup
+    Properties:
+      LogGroupName: !Ref AWS::StackName
+      RetentionInDays: 365
+
+  # This IAM Role grants the service access to register/unregister with the
+  # Application Load Balancer (ALB). It is based on the default documented here:
+  # http://docs.aws.amazon.com/AmazonECS/latest/developerguide/service_IAM_role.html
+  # We also add the ability to perform routine ECS tasks like pulling containers from
+  # the repo and accessing secrets for decryption
+  ServiceRole:
+    Type: AWS::IAM::Role
+    Properties:
+      RoleName: !Sub ecs-service-role-${AWS::StackName}
+      Path: /
+      AssumeRolePolicyDocument:
+        Statement:
+          - Effect: 'Allow'
+            Principal:
+              Service:
+                - ecs.amazonaws.com
+                - ecs-tasks.amazonaws.com
+            Action:
+              - 'sts:AssumeRole'
+      ManagedPolicyArns:
+        - arn:aws:iam::aws:policy/service-role/AmazonECSTaskExecutionRolePolicy
+      Policies:
+        - PolicyName: !Sub ecs-service-${AWS::StackName}
+          PolicyDocument:
+            Version: '2012-10-17'
+            Statement:
+              - Effect: Allow
+                Action:
+                  - 'secretsmanager:GetSecretValue'
+                Resource:
+                  Fn::ImportValue: !Sub '${EnvironmentName}:APISecretArn'
+              - Effect: Allow
+                Action:
+                  - 'ec2:AuthorizeSecurityGroupIngress'
+                  - 'ec2:Describe*'
+                  - 'elasticloadbalancing:DeregisterInstancesFromLoadBalancer'
+                  - 'elasticloadbalancing:Describe*'
+                  - 'elasticloadbalancing:RegisterInstancesWithLoadBalancer'
+                  - 'elasticloadbalancing:DeregisterTargets'
+                  - 'elasticloadbalancing:DescribeTargetGroups'
+                  - 'elasticloadbalancing:DescribeTargetHealth'
+                  - 'elasticloadbalancing:RegisterTargets'
+                Resource: '*'

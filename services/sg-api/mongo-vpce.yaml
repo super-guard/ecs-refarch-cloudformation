@@ -22,6 +22,8 @@ Resources:
       SubnetIds: !Split
         - ','
         - Fn::ImportValue: !Sub ${EnvironmentName}:PrivateSubnets
+      SecurityGroupIds:
+        - !Sub ${EnvironmentName}:MongoVPCESecurityGroup
 
 Outputs:
   MongoEndpointID:
