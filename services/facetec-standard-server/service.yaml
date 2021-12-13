@@ -7,6 +7,10 @@ Parameters:
     Description: The name of the environment to add this service to
     Default: superguard-production
 
+  Cluster:
+    Type: String
+    Description: The cluster to deploy the facetec service into
+
   EnvPort:
     Type: String
     Description: The port to expose the service on
@@ -25,8 +29,7 @@ Resources:
   Service:
     Type: AWS::ECS::Service
     Properties:
-      Cluster:
-        Fn::ImportValue: !Sub ${EnvironmentName}:Cluster
+      Cluster: !Ref Cluster
       Role: !Ref ServiceRole
       DesiredCount: !Ref DesiredCount
       TaskDefinition: !Ref TaskDefinition
@@ -64,7 +67,7 @@ Resources:
   ServiceRole:
     Type: AWS::IAM::Role
     Properties:
-      RoleName: !Sub ecs-service-role-${AWS::StackName}
+      RoleName: !Sub ecs-service-role-${EnvironmentName}-facetec
       Path: /
       AssumeRolePolicyDocument:
         Statement:

@@ -81,6 +81,7 @@ Resources:
         EnvironmentName: !Ref EnvironmentName
         ImageUrl: 797885264545.dkr.ecr.ap-southeast-2.amazonaws.com/superguard-facetec-standard-server:latest
         DesiredCount: 1
+        Cluster: !GetAtt ECS.Outputs.FaceTecCluster
 
   LifecycleHook:
     Type: AWS::CloudFormation::Stack
