@@ -33,9 +33,9 @@ Resources:
           Type: A
           AliasTarget:
             DNSName:
-              Fn::ImportValue: !Sub ${EnvironmentName}:LoadBalancerUrl
+              Fn::ImportValue: !Sub ${EnvironmentName}:PublicLoadBalancerUrl
             HostedZoneId:
-              Fn::ImportValue: !Sub ${EnvironmentName}:LoadBalancerHostedZone
+              Fn::ImportValue: !Sub ${EnvironmentName}:PublicLoadBalancerHostedZone
 
   WildcardRecord:
     Type: AWS::Route53::RecordSetGroup
@@ -47,6 +47,6 @@ Resources:
           Type: A
           AliasTarget:
             DNSName:
-              Fn::ImportValue: !Sub ${EnvironmentName}:LoadBalancerUrl
+              Fn::ImportValue: !Sub ${EnvironmentName}:PublicLoadBalancerUrl
             HostedZoneId:
-              Fn::ImportValue: !Sub ${EnvironmentName}:LoadBalancerHostedZone
+              Fn::ImportValue: !Sub ${EnvironmentName}:PublicLoadBalancerHostedZone

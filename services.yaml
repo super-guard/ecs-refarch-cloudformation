@@ -29,6 +29,14 @@ Parameters:
     Default: ap-southeast-2
 
 Resources:
+  APIRepo:
+    Type: AWS::CloudFormation::Stack
+    Properties:
+      TemplateURL: !Sub https://${S3Bucket}.s3.${S3Region}.amazonaws.com/infrastructure/image-repo.yaml.yaml
+      Parameters:
+        EnvironmentName: !Ref EnvironmentName
+        RepoName: github-actions
+
   VPC:
     Type: AWS::CloudFormation::Stack
     Properties:
@@ -49,7 +57,7 @@ Resources:
         EnvironmentName: !Ref EnvironmentName
         VPC: !GetAtt VPC.Outputs.VPC
 
-  ALB:
+  PublicALB:
     Type: AWS::CloudFormation::Stack
     Properties:
       TemplateURL: !Sub https://${S3Bucket}.s3.${S3Region}.amazonaws.com/infrastructure/load-balancers.yaml
@@ -57,7 +65,19 @@ Resources:
         EnvironmentName: !Ref EnvironmentName
         VPC: !GetAtt VPC.Outputs.VPC
         Subnets: !GetAtt VPC.Outputs.PublicSubnets
-        SecurityGroup: !GetAtt SecurityGroups.Outputs.LoadBalancerSecurityGroup
+        SecurityGroup: !GetAtt SecurityGroups.Outputs.PublicLoadBalancerSecurityGroup
+        SSLCert:
+          Fn::ImportValue: SuperGuardDomainCertificate
+
+  PrivateALB:
+    Type: AWS::CloudFormation::Stack
+    Properties:
+      TemplateURL: !Sub https://${S3Bucket}.s3.${S3Region}.amazonaws.com/infrastructure/load-balancers.yaml
+      Parameters:
+        EnvironmentName: !Ref EnvironmentName
+        VPC: !GetAtt VPC.Outputs.VPC
+        Subnets: !GetAtt VPC.Outputs.PrivateSubnets
+        SecurityGroup: !GetAtt SecurityGroups.Outputs.PrivateLoadBalancerSecurityGroup
         SSLCert:
           Fn::ImportValue: SuperGuardDomainCertificate
 
@@ -70,18 +90,20 @@ Resources:
         InstanceType: t2.medium
         ClusterSize: 1
         MaxClusterSize: 4
-        SecurityGroup: !GetAtt SecurityGroups.Outputs.ECSHostSecurityGroup
         Subnets: !GetAtt VPC.Outputs.PrivateSubnets
+        SecurityGroup: !GetAtt SecurityGroups.Outputs.ECSHostSecurityGroup
 
-  FaceTecStandardServer:
+  FaceTecECS:
     Type: AWS::CloudFormation::Stack
     Properties:
-      TemplateURL: !Sub https://${S3Bucket}.s3.${S3Region}.amazonaws.com/services/facetec-standard-server/service.yaml
+      TemplateURL: !Sub https://${S3Bucket}.s3.${S3Region}.amazonaws.com/infrastructure/ecs-cluster.yaml
       Parameters:
         EnvironmentName: !Ref EnvironmentName
-        ImageUrl: 797885264545.dkr.ecr.ap-southeast-2.amazonaws.com/superguard-facetec-standard-server:latest
-        DesiredCount: 1
-        Cluster: !GetAtt ECS.Outputs.FaceTecCluster
+        InstanceType: c5.2xlarge
+        ClusterSize: 1
+        MaxClusterSize: 4
+        Subnets: !GetAtt VPC.Outputs.PrivateSubnets
+        SecurityGroup: !GetAtt SecurityGroups.Outputs.FaceTecHostSecurityGroup
 
   LifecycleHook:
     Type: AWS::CloudFormation::Stack
@@ -90,6 +112,14 @@ Resources:
       Parameters:
         Cluster: !GetAtt ECS.Outputs.Cluster
         ECSAutoScalingGroupName: !GetAtt ECS.Outputs.ECSAutoScalingGroupName
+
+  FaceTecLifecycleHook:
+    Type: AWS::CloudFormation::Stack
+    Properties:
+      TemplateURL: !Sub https://${S3Bucket}.s3.${S3Region}.amazonaws.com/infrastructure/lifecyclehook.yaml
+      Parameters:
+        Cluster: !GetAtt FaceTecECS.Outputs.Cluster
+        ECSAutoScalingGroupName: !GetAtt FaceTecECS.Outputs.ECSAutoScalingGroupName
 
 Outputs:
   VPC:
@@ -110,35 +140,65 @@ Outputs:
     Export:
       Name: !Sub ${EnvironmentName}:PrivateSubnets
 
-  Cluster:
+  ECSCluster:
     Description: The ECS Cluster ID that services should run on
     Value: !GetAtt ECS.Outputs.Cluster
     Export:
-      Name: !Sub ${EnvironmentName}:Cluster
+      Name: !Sub ${EnvironmentName}:ECSCluster
 
-  Listener:
-    Description: The Application Load Balancer listener to register services with
-    Value: !GetAtt ALB.Outputs.Listener
+  FaceTecECSCluster:
+    Description: The FaceTec ECS Cluster ID
+    Value: !GetAtt FaceTecECS.Outputs.Cluster
     Export:
-      Name: !Sub ${EnvironmentName}:Listener
+      Name: !Sub ${EnvironmentName}:FaceTecECSCluster
 
-  LoadBalancerUrl:
-    Description: The Application Load Balancer DNS url
-    Value: !GetAtt ALB.Outputs.LoadBalancerUrl
+  PublicListener:
+    Description: The Public Application Load Balancer listener to register services with
+    Value: !GetAtt PublicALB.Outputs.Listener
     Export:
-      Name: !Sub ${EnvironmentName}:LoadBalancerUrl
+      Name: !Sub ${EnvironmentName}:PublicListener
 
-  LoadBalancerHostedZone:
-    Description: The Application Load Balancer Hosted DNS Zone
-    Value: !GetAtt ALB.Outputs.LoadBalancerHostedZone
+  PrivateListener:
+    Description: The Private Application Load Balancer listener to register services with
+    Value: !GetAtt PrivateALB.Outputs.Listener
     Export:
-      Name: !Sub ${EnvironmentName}:LoadBalancerHostedZone
+      Name: !Sub ${EnvironmentName}:PrivateListener
+
+  PublicLoadBalancerUrl:
+    Description: The Public Application Load Balancer DNS url
+    Value: !GetAtt PublicALB.Outputs.LoadBalancerUrl
+    Export:
+      Name: !Sub ${EnvironmentName}:PublicLoadBalancerUrl
+
+  PublicLoadBalancerHostedZone:
+    Description: The Public Application Load Balancer Hosted DNS Zone
+    Value: !GetAtt PublicALB.Outputs.LoadBalancerHostedZone
+    Export:
+      Name: !Sub ${EnvironmentName}:PublicLoadBalancerHostedZone
+
+  PrivateLoadBalancerUrl:
+    Description: The Private Application Load Balancer DNS url
+    Value: !GetAtt PrivateALB.Outputs.LoadBalancerUrl
+    Export:
+      Name: !Sub ${EnvironmentName}:PrivateLoadBalancerUrl
+
+  PrivateLoadBalancerHostedZone:
+    Description: The Private Application Load Balancer Hosted DNS Zone
+    Value: !GetAtt PrivateALB.Outputs.LoadBalancerHostedZone
+    Export:
+      Name: !Sub ${EnvironmentName}:PrivateLoadBalancerHostedZone
 
   ECSServiceAutoScalingRoleARN:
     Description: The ECS service auto scaling role ARN
     Value: !GetAtt ECS.Outputs.ECSServiceAutoScalingRole
     Export:
       Name: !Sub ${EnvironmentName}:ECSServiceAutoScalingRoleARN
+
+  FaceTecECSServiceAutoScalingRoleARN:
+    Description: The ECS service auto scaling role ARN
+    Value: !GetAtt FaceTecECS.Outputs.ECSServiceAutoScalingRole
+    Export:
+      Name: !Sub ${EnvironmentName}:FaceTecECSServiceAutoScalingRoleARN
 
   MongoVPCESecurityGroup:
     Description: The securtity group to allow access to the MongoDB VPCE

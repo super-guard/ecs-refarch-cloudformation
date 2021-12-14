@@ -7,6 +7,10 @@ Parameters:
     Description: An environment name that will be prefixed to resource names
     Type: String
 
+  ClusterName:
+    Description: A unique name for the cluster
+    Type: String
+
   InstanceType:
     Description: Which instance type should we use to build the ECS cluster?
     Type: String
@@ -22,29 +26,29 @@ Parameters:
     Type: Number
     Default: 4
 
+  InstanceVolumeSize:
+    Description: How much MB to allocate on a dedeicated EBS volme per instance
+    Type: Number
+    Default: 30
+
   Subnets:
     Description: Choose which subnets this ECS cluster should be deployed to
     Type: List<AWS::EC2::Subnet::Id>
 
-  SecurityGroup:
+  SecurityGroups:
     Description: Select the Security Group to use for the ECS cluster hosts
-    Type: AWS::EC2::SecurityGroup::Id
+    Type: List<AWS::EC2::SecurityGroup::Id>
 
   ECSAMI:
     Description: ECS-Optimized AMI ID
     Type: AWS::SSM::Parameter::Value<AWS::EC2::Image::Id>
-    Default: /aws/service/ecs/optimized-ami/amazon-linux/recommended/image_id
+    Default: /aws/service/ecs/optimized-ami/amazon-linux-2/recommended/image_id
 
 Resources:
   ECSCluster:
     Type: AWS::ECS::Cluster
     Properties:
-      ClusterName: !Ref EnvironmentName
-
-  FaceTecCluster:
-    Type: AWS::ECS::Cluster
-    Properties:
-      ClusterName: !Sub ${EnvironmentName}-facetec
+      ClusterName: !Sub ${ClusterName}-${EnvironmentName}
 
   ECSAutoScalingGroup:
     DependsOn: ECSCluster
@@ -57,7 +61,7 @@ Resources:
       DesiredCapacity: !Ref ClusterSize
       Tags:
         - Key: Name
-          Value: !Sub ${EnvironmentName} ECS host
+          Value: !Sub ${ECSCluster} ECS host
           PropagateAtLaunch: true
     CreationPolicy:
       ResourceSignal:
@@ -80,9 +84,12 @@ Resources:
     Properties:
       ImageId: !Ref ECSAMI
       InstanceType: !Ref InstanceType
-      SecurityGroups:
-        - !Ref SecurityGroup
+      SecurityGroups: !Ref SecurityGroups
       IamInstanceProfile: !Ref ECSInstanceProfile
+      BlockDeviceMappings:
+        - DeviceName: /dev/sda1
+          Ebs:
+            VolumeSize: !Ref InstanceVolumeSize
       UserData:
         'Fn::Base64': !Sub |
           #!/bin/bash
@@ -130,11 +137,6 @@ Resources:
                 files:
                   - /etc/cfn/cfn-hup.conf
                   - /etc/cfn/hooks.d/cfn-auto-reloader.conf
-
-  ImageRepository:
-    Type: AWS::ECR::Repository
-    Properties:
-      RepositoryName: !Sub 'github-actions-${EnvironmentName}'
 
   # This IAM Role is attached to all of the ECS hosts. It is based on the default role
   # published here:
@@ -308,10 +310,6 @@ Outputs:
   Cluster:
     Description: A reference to the ECS cluster
     Value: !Ref ECSCluster
-
-  FaceTecCluster:
-    Description: A reference to the facetec ECS cluster
-    Value: !Ref FaceTecCluster
 
   ECSServiceAutoScalingRole:
     Description: A reference to ECS service auto scaling role

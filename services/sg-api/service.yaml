@@ -61,7 +61,7 @@ Resources:
     DependsOn: ListenerRule
     Properties:
       Cluster:
-        Fn::ImportValue: !Sub ${EnvironmentName}:Cluster
+        Fn::ImportValue: !Sub ${EnvironmentName}:ECSCluster
       Role: !Ref ServiceRole
       DesiredCount: !Ref DesiredCount
       TaskDefinition: !Ref TaskDefinition
@@ -184,7 +184,7 @@ Resources:
     Type: AWS::ElasticLoadBalancingV2::ListenerRule
     Properties:
       ListenerArn:
-        Fn::ImportValue: !Sub ${EnvironmentName}:Listener
+        Fn::ImportValue: !Sub ${EnvironmentName}:PublicListener
       Priority: 2
       Conditions:
         - Field: host-header
