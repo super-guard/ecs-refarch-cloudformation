@@ -46,7 +46,7 @@ Resources:
           Memory: 16000
           PortMappings:
             - ContainerPort: !Ref EnvPort
-            - HostPort: !Ref EnvPort
+              HostPort: !Ref EnvPort
           LogConfiguration:
             LogDriver: awslogs
             Options:
