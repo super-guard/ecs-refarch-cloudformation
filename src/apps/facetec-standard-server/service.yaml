@@ -21,6 +21,14 @@ Parameters:
     Type: String
     Description: The Docker image url to deploy for this service
 
+  ServiceDiscoveryHeaderName:
+    Type: String
+    Description: The HTTP header name to use for service discovery on the private ALB
+
+  ServiceDiscoveryHeaderValue:
+    Type: String
+    Description: The HTTP header value to use for service discovery on the private ALB
+
 Resources:
   Service:
     Type: AWS::ECS::Service
@@ -85,10 +93,11 @@ Resources:
         Fn::ImportValue: !Sub ${EnvironmentName}:PrivateListener
       Priority: 2
       Conditions:
-        - Field: host-header
-          HostHeaderConfig:
+        - Field: http-header
+          HttpHeaderConfig:
+            HttpHeaderName: !Ref ServiceDiscoveryHeaderName
             Values:
-              - '*'
+              - !Ref ServiceDiscoveryHeaderValue
       Actions:
         - TargetGroupArn: !Ref TargetGroup
           Type: forward
