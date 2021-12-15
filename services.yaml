@@ -87,11 +87,13 @@ Resources:
       TemplateURL: !Sub https://${S3Bucket}.s3.${S3Region}.amazonaws.com/infrastructure/ecs-cluster.yaml
       Parameters:
         EnvironmentName: !Ref EnvironmentName
+        ClusterName: known-hosts
         InstanceType: t2.medium
         ClusterSize: 1
         MaxClusterSize: 4
         Subnets: !GetAtt VPC.Outputs.PrivateSubnets
-        SecurityGroup: !GetAtt SecurityGroups.Outputs.ECSHostSecurityGroup
+        SecurityGroups:
+          - !GetAtt SecurityGroups.Outputs.ECSHostSecurityGroup
 
   FaceTecECS:
     Type: AWS::CloudFormation::Stack
@@ -99,11 +101,13 @@ Resources:
       TemplateURL: !Sub https://${S3Bucket}.s3.${S3Region}.amazonaws.com/infrastructure/ecs-cluster.yaml
       Parameters:
         EnvironmentName: !Ref EnvironmentName
+        ClusterName: facetec-hosts
         InstanceType: c5.2xlarge
         ClusterSize: 1
         MaxClusterSize: 4
         Subnets: !GetAtt VPC.Outputs.PrivateSubnets
-        SecurityGroup: !GetAtt SecurityGroups.Outputs.FaceTecHostSecurityGroup
+        SecurityGroups:
+          - !GetAtt SecurityGroups.Outputs.FaceTecHostSecurityGroup
 
   LifecycleHook:
     Type: AWS::CloudFormation::Stack
