@@ -27,7 +27,7 @@ Resources:
     DependsOn: ListenerRule
     Properties:
       Cluster:
-        Fn::ImportValue: !Sub ${EnvironmentName}:FaceTecCluster
+        Fn::ImportValue: !Sub ${EnvironmentName}:FaceTecECSCluster
       Role: !Ref ServiceRole
       DesiredCount: !Ref DesiredCount
       TaskDefinition: !Ref TaskDefinition
