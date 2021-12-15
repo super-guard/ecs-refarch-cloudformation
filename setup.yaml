@@ -76,31 +76,27 @@ Resources:
           - Action:
               - 'iam:*'
             Effect: Allow
-            Resource: !Sub 'arn:${AWS::Partition}:iam::${AWS::AccountId}:role/superguard-*'
+            Resource: !Sub 'arn:${AWS::Partition}:iam::${AWS::AccountId}:role/*'
           - Action:
               - 'iam:*'
             Effect: Allow
-            Resource: !Sub 'arn:${AWS::Partition}:iam::${AWS::AccountId}:role/ecs-service-*'
-          - Action:
-              - 'iam:*'
-            Effect: Allow
-            Resource: !Sub 'arn:${AWS::Partition}:iam::${AWS::AccountId}:instance-profile/superguard-*'
+            Resource: !Sub 'arn:${AWS::Partition}:iam::${AWS::AccountId}:instance-profile/*'
           - Action:
               - 'ecr:*'
             Effect: Allow
-            Resource: !Sub 'arn:${AWS::Partition}:ecr:*:${AWS::AccountId}:repository/github-actions-*'
+            Resource: !Sub 'arn:${AWS::Partition}:ecr:*:${AWS::AccountId}:repository/*'
           - Action:
               - 'ecs:*'
             Effect: Allow
-            Resource: !Sub 'arn:${AWS::Partition}:ecs:*:${AWS::AccountId}:cluster/superguard-*'
+            Resource: !Sub 'arn:${AWS::Partition}:ecs:*:${AWS::AccountId}:cluster/*'
           - Action:
               - 'logs:*'
             Effect: Allow
-            Resource: !Sub 'arn:${AWS::Partition}:logs:*:${AWS::AccountId}:log-group:superguard-*'
+            Resource: !Sub 'arn:${AWS::Partition}:logs:*:${AWS::AccountId}:log-group:*'
           - Action:
               - 'secretsmanager:*'
             Effect: Allow
-            Resource: !Sub 'arn:${AWS::Partition}:secretsmanager:*:${AWS::AccountId}:secret:superguard-*'
+            Resource: !Sub 'arn:${AWS::Partition}:secretsmanager:*:${AWS::AccountId}:secret:*'
           - Action:
               - 's3:*'
             Effect: Allow
