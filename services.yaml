@@ -32,7 +32,7 @@ Resources:
   APIRepo:
     Type: AWS::CloudFormation::Stack
     Properties:
-      TemplateURL: !Sub https://${S3Bucket}.s3.${S3Region}.amazonaws.com/infrastructure/image-repo.yaml.yaml
+      TemplateURL: !Sub https://${S3Bucket}.s3.${S3Region}.amazonaws.com/infrastructure/image-repo.yaml
       Parameters:
         EnvironmentName: !Ref EnvironmentName
         RepoName: github-actions
