@@ -151,7 +151,7 @@ Resources:
     Type: AWS::IAM::Role
     Properties:
       Path: /
-      RoleName: !Sub ${EnvironmentName}-ECSRole-${AWS::Region}
+      RoleName: !Sub ${ClusterName}-${EnvironmentName}-ECSRole
       AssumeRolePolicyDocument: |
         {
             "Statement": [{
@@ -166,7 +166,7 @@ Resources:
         - arn:aws:iam::aws:policy/service-role/AmazonEC2RoleforSSM
         - arn:aws:iam::aws:policy/CloudWatchAgentServerPolicy
       Policies:
-        - PolicyName: ecs-service
+        - PolicyName: !Sub ${ClusterName}-ecs-service-policy
           PolicyDocument: |
             {
                 "Statement": [{
@@ -209,7 +209,7 @@ Resources:
               - application-autoscaling.amazonaws.com
       Path: /
       Policies:
-        - PolicyName: ecs-service-autoscaling
+        - PolicyName: !Sub ${ClusterName}-ecs-service-autoscaling-policy
           PolicyDocument:
             Statement:
               Effect: Allow

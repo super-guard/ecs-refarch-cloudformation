@@ -45,7 +45,7 @@ Resources:
     Type: 'AWS::IAM::Role'
     Properties:
       Policies:
-        - PolicyName: lambda-inline
+        - PolicyName: !Sub ${Cluster}-lambda-inline
           PolicyDocument:
             Version: 2012-10-17
             Statement:
