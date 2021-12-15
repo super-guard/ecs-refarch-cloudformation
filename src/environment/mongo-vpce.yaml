@@ -23,7 +23,7 @@ Resources:
         - ','
         - Fn::ImportValue: !Sub ${EnvironmentName}:PrivateSubnets
       SecurityGroupIds:
-        - !Sub ${EnvironmentName}:MongoVPCESecurityGroup
+        - Fn::ImportValue: !Sub ${EnvironmentName}:MongoVPCESecurityGroup
 
 Outputs:
   MongoEndpointID:

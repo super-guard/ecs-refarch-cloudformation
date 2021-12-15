@@ -1,4 +1,4 @@
-name: Sync Cloudformation Templates + Base Layer
+name: Sync Cloudformation Templates Staging
 
 on:
   push:
@@ -15,11 +15,11 @@ on:
   workflow_dispatch:
 
 env:
+  AWS_REGION: ap-southeast-2
   AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
   AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
 
-  CLOUDFORMATION_TEMPLATES_S3_BUCKET: superguard-ecs-cloudformation
-  CLOUDFORMATION_TEMPLATES_S3_REGION: ap-southeast-2
+  CLOUDFORMATION_TEMPLATES_S3_BUCKET: superguard-ecs-cloudformation-stage
 
 defaults:
   run:
@@ -33,6 +33,14 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v2
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v1
+        with:
+          aws-access-key-id: ${{ env.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ env.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ env.AWS_REGION }}
+
       - name: Run tests
         run: |
           chmod a+x ./test/validate-templates.sh
@@ -51,7 +59,7 @@ jobs:
         with:
           aws-access-key-id: ${{ env.AWS_ACCESS_KEY_ID }}
           aws-secret-access-key: ${{ env.AWS_SECRET_ACCESS_KEY }}
-          aws-region: ${{ env.CLOUDFORMATION_TEMPLATES_S3_REGION }}
+          aws-region: ${{ env.AWS_REGION }}
 
       - name: Sync Templates to S3
         uses: jakejarvis/s3-sync-action@master
@@ -60,28 +68,3 @@ jobs:
         env:
           SOURCE_DIR: src/
           AWS_S3_BUCKET: ${{ env.CLOUDFORMATION_TEMPLATES_S3_BUCKET }}
-
-  deploy:
-    name: Deploy base infrastructure
-    runs-on: ubuntu-latest
-    timeout-minutes: 20
-    needs: [sync]
-    steps:
-      - name: Configure AWS credentials
-        uses: aws-actions/configure-aws-credentials@v1
-        with:
-          aws-access-key-id: ${{ env.AWS_ACCESS_KEY_ID }}
-          aws-secret-access-key: ${{ env.AWS_SECRET_ACCESS_KEY }}
-          aws-region: ${{ env.CLOUDFORMATION_TEMPLATES_S3_REGION }}
-
-      - name: Deploy the base infra layer using CFN
-        id: setup-base-layer
-        uses: aws-actions/aws-cloudformation-github-deploy@v1
-        with:
-          name: sg-base-infrastructure
-          template: https://${{ env.CLOUDFORMATION_TEMPLATES_S3_BUCKET }}.s3.${{ env.CLOUDFORMATION_TEMPLATES_S3_REGION }}.amazonaws.com/infrastructure/base.yaml
-          capabilities: 'CAPABILITY_NAMED_IAM'
-          no-fail-on-empty-changeset: '1'
-          parameter-overrides: >-
-            S3Bucket=${{ env.CLOUDFORMATION_TEMPLATES_S3_BUCKET }},
-            S3Region=${{ env.CLOUDFORMATION_TEMPLATES_S3_REGION }}

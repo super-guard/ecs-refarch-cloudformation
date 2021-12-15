@@ -1,0 +1,86 @@
+name: Deploy Staging Environment Infra
+
+on:
+  workflow_run:
+    workflows: ['Sync Cloudformation Templates Staging']
+    types:
+      - completed
+
+env:
+  AWS_REGION: ap-southeast-2
+  AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+  AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+
+  CLOUDFORMATION_TEMPLATES_S3_BUCKET: superguard-ecs-cloudformation-stage
+
+  ENV_NAME: superguard-stage
+
+jobs:
+  deploy-base:
+    if: ${{ github.event.workflow_run.conclusion == 'success' }}
+    name: Deploy base infrastructure
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    needs: [sync]
+    steps:
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v1
+        with:
+          aws-access-key-id: ${{ env.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ env.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ env.AWS_REGION }}
+
+      - name: Deploy the base infra layer using CFN
+        id: setup-base-layer
+        uses: aws-actions/aws-cloudformation-github-deploy@v1
+        with:
+          name: sg-base-infrastructure
+          template: https://${{ env.CLOUDFORMATION_TEMPLATES_S3_BUCKET }}.s3.${{ env.AWS_REGION }}.amazonaws.com/infrastructure/base.yaml
+          capabilities: 'CAPABILITY_NAMED_IAM'
+          no-fail-on-empty-changeset: '1'
+          parameter-overrides: >-
+            S3Bucket=${{ env.CLOUDFORMATION_TEMPLATES_S3_BUCKET }},
+            S3Region=${{ env.AWS_REGION }}
+
+  deploy-environment:
+    if: ${{ github.event.workflow_run.conclusion == 'success' }}
+    needs: [deploy-base]
+    name: Deploy infrastructure
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    # needs: [inform-slack-start]
+    outputs:
+      env-name: ${{ steps.env-name.outputs.environment }}
+
+    steps:
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v1
+        with:
+          aws-access-key-id: ${{ env.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ env.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ env.AWS_REGION }}
+
+      - name: Deploy the services infrastructure with CloudFormation
+        id: environment-infra-stack
+        uses: aws-actions/aws-cloudformation-github-deploy@v1
+        with:
+          name: ${{ env.ENV_NAME }}-services-infrastructure
+          template: https://${{ env.CLOUDFORMATION_TEMPLATES_S3_BUCKET }}.s3.${{ env.AWS_REGION }}.amazonaws.com/environment/base.yaml
+          capabilities: 'CAPABILITY_NAMED_IAM'
+          no-fail-on-empty-changeset: '1'
+          parameter-overrides: >-
+            EnvironmentName=${{ env.ENV_NAME }},
+            S3Bucket=${{ env.CLOUDFORMATION_TEMPLATES_S3_BUCKET }},
+            S3Region=${{ env.AWS_REGION }}
+
+      - name: Deploy the VPC Endpoint to connect with MongoDB
+        id: environment-mongo-privatelink
+        uses: aws-actions/aws-cloudformation-github-deploy@v1
+        with:
+          name: ${{ env.ENV_NAME }}-mongo-privatelink
+          template: https://${{ env.CLOUDFORMATION_TEMPLATES_S3_BUCKET }}.s3.${{ env.AWS_REGION }}.amazonaws.com/environment/mongo-vpce.yaml
+          capabilities: 'CAPABILITY_NAMED_IAM'
+          no-fail-on-empty-changeset: '1'
+          parameter-overrides: >-
+            EnvironmentName=${{ env.ENV_NAME }},
+            MongoVPCEServiceName=${{ secrets.MONGO_VPCE_SERVICE_NAME_STAGE }}
