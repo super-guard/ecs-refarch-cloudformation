@@ -92,8 +92,7 @@ Resources:
         ClusterSize: 1
         MaxClusterSize: 4
         Subnets: !GetAtt VPC.Outputs.PrivateSubnets
-        SecurityGroups:
-          - !GetAtt SecurityGroups.Outputs.ECSHostSecurityGroup
+        SecurityGroup: !GetAtt SecurityGroups.Outputs.ECSHostSecurityGroup
 
   FaceTecECS:
     Type: AWS::CloudFormation::Stack
@@ -106,8 +105,7 @@ Resources:
         ClusterSize: 1
         MaxClusterSize: 4
         Subnets: !GetAtt VPC.Outputs.PrivateSubnets
-        SecurityGroups:
-          - !GetAtt SecurityGroups.Outputs.FaceTecHostSecurityGroup
+        SecurityGroups: !GetAtt SecurityGroups.Outputs.FaceTecHostSecurityGroup
 
   LifecycleHook:
     Type: AWS::CloudFormation::Stack
