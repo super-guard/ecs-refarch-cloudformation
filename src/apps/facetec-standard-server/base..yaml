@@ -1,0 +1,60 @@
+Description: >
+
+  This template deploys a highly available ECS cluster using an AutoScaling Group, with 
+  ECS hosts distributed across multiple Availability Zones.
+
+  Last Modified: 4th November 2021
+  Author: Varshneya Rao <varshneya.rao@toptal.com> (Original - Paul Maddox <pmaddox@amazon.com>)
+
+Parameters:
+  EnvironmentName:
+    Type: String
+    Default: production
+    Description: The name of the environment this stack is being deployed for
+
+  S3Bucket:
+    Type: String
+    Description: Please provide the S3 Bucket to find the Cloudformation yaml files
+    Default: superguard-ecs-cloudformation
+
+  S3Region:
+    Type: String
+    Description: Please provide the S3 region hosting the S3 bucket
+    Default: ap-southeast-2
+
+Resources:
+  FaceTecECS:
+    Type: AWS::CloudFormation::Stack
+    Properties:
+      TemplateURL: !Sub https://${S3Bucket}.s3.${S3Region}.amazonaws.com/service/ecs-cluster.yaml
+      Parameters:
+        EnvironmentName: !Ref EnvironmentName
+        ClusterName: facetec-hosts
+        InstanceType: c5.2xlarge
+        ClusterSize: 1
+        MaxClusterSize: 4
+        Subnets:
+          Fn::ImportValue: !Sub ${EnvironmentName}:PrivateSubnets
+        SecurityGroup:
+          Fn::ImportValue: !Sub ${EnvironmentName}:FaceTecHostSecurityGroup
+
+  FaceTecLifecycleHook:
+    Type: AWS::CloudFormation::Stack
+    Properties:
+      TemplateURL: !Sub https://${S3Bucket}.s3.${S3Region}.amazonaws.com/service/lifecyclehook.yaml
+      Parameters:
+        Cluster: !GetAtt FaceTecECS.Outputs.Cluster
+        ECSAutoScalingGroupName: !GetAtt FaceTecECS.Outputs.ECSAutoScalingGroupName
+
+Outputs:
+  FaceTecECSCluster:
+    Description: The FaceTec ECS Cluster ID
+    Value: !GetAtt FaceTecECS.Outputs.Cluster
+    Export:
+      Name: !Sub ${EnvironmentName}:FaceTecECSCluster
+
+  FaceTecECSServiceAutoScalingRoleARN:
+    Description: The ECS service auto scaling role ARN
+    Value: !GetAtt FaceTecECS.Outputs.ECSServiceAutoScalingRole
+    Export:
+      Name: !Sub ${EnvironmentName}:FaceTecECSServiceAutoScalingRoleARN

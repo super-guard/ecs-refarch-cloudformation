@@ -37,10 +37,6 @@ Parameters:
     Description: The port to access the Redis service
     Default: 6379
 
-  EnvFaceTecApiBaseUrl:
-    Type: String
-    Description: The base url to access the FaceTec Standard Server API
-
   DesiredCount:
     Type: Number
     Description: How many instances of this task should we run across our cluster?
@@ -111,7 +107,8 @@ Resources:
             - Name: REDIS_PORT
               Value: !Ref EnvRedisPort
             - Name: FACETEC_API_BASE_URL
-              Value: !Ref EnvFaceTecApiBaseUrl
+              Value:
+                Fn::ImportValue: !Sub ${EnvironmentName}:PrivateLoadBalancerUrl
           Secrets:
             - Name: DATABASE_URI
               ValueFrom: !Sub

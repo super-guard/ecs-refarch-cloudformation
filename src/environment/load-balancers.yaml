@@ -69,7 +69,7 @@ Resources:
 
   # We define a default target group here, as this is a mandatory Parameters
   # when creating an Application Load Balancer Listener. This is not used, instead
-  # a target group is created per-service in each service template (../services/*)
+  # a target group is created per-service in each app template (../apps/*)
   DefaultTargetGroup:
     Type: AWS::ElasticLoadBalancingV2::TargetGroup
     Properties:
