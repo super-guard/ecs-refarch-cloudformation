@@ -7,6 +7,10 @@ Parameters:
     Description: An environment name that will be prefixed to resource names
     Type: String
 
+  LoadbalancerName:
+    Description: A unique name for the load balancer
+    Type: String
+
   VPC:
     Type: AWS::EC2::VPC::Id
     Description: Choose which VPC the Application Load Balancer should be deployed to
@@ -27,7 +31,7 @@ Resources:
   LoadBalancer:
     Type: AWS::ElasticLoadBalancingV2::LoadBalancer
     Properties:
-      Name: !Ref EnvironmentName
+      Name: !Sub ${LoadbalancerName}-${EnvironmentName}
       Subnets: !Ref Subnets
       SecurityGroups:
         - !Ref SecurityGroup
@@ -69,7 +73,7 @@ Resources:
   DefaultTargetGroup:
     Type: AWS::ElasticLoadBalancingV2::TargetGroup
     Properties:
-      Name: !Sub ${EnvironmentName}-default
+      Name: !Sub ${LoadbalancerName}-${EnvironmentName}-default
       VpcId: !Ref VPC
       Port: 80
       Protocol: HTTP

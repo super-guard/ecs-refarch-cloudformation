@@ -63,6 +63,7 @@ Resources:
       TemplateURL: !Sub https://${S3Bucket}.s3.${S3Region}.amazonaws.com/infrastructure/load-balancers.yaml
       Parameters:
         EnvironmentName: !Ref EnvironmentName
+        LoadbalancerName: PublicALB
         VPC: !GetAtt VPC.Outputs.VPC
         Subnets: !GetAtt VPC.Outputs.PublicSubnets
         SecurityGroup: !GetAtt SecurityGroups.Outputs.PublicLoadBalancerSecurityGroup
@@ -75,6 +76,7 @@ Resources:
       TemplateURL: !Sub https://${S3Bucket}.s3.${S3Region}.amazonaws.com/infrastructure/load-balancers.yaml
       Parameters:
         EnvironmentName: !Ref EnvironmentName
+        LoadbalancerName: PrivateALB
         VPC: !GetAtt VPC.Outputs.VPC
         Subnets: !GetAtt VPC.Outputs.PrivateSubnets
         SecurityGroup: !GetAtt SecurityGroups.Outputs.PrivateLoadBalancerSecurityGroup
