@@ -6,6 +6,9 @@ on:
     types:
       - completed
 
+  # Allows running this workflow manually from the Actions tab
+  workflow_dispatch:
+
 env:
   AWS_REGION: ap-southeast-2
   AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
@@ -21,7 +24,6 @@ jobs:
     name: Deploy base infrastructure
     runs-on: ubuntu-latest
     timeout-minutes: 20
-    needs: [sync]
     steps:
       - name: Configure AWS credentials
         uses: aws-actions/configure-aws-credentials@v1
