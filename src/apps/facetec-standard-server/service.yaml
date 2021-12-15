@@ -53,7 +53,7 @@ Resources:
         - Name: facetec-standard-server
           Essential: true
           Image: !Ref ImageUrl
-          Memory: 16000
+          Memory: 15360
           PortMappings:
             - ContainerPort: !Ref EnvPort
           LogConfiguration:
