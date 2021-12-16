@@ -27,7 +27,7 @@ Parameters:
     Default: 4
 
   InstanceVolumeSize:
-    Description: How much MB to allocate on a dedeicated EBS volme per instance
+    Description: How much GB to allocate on a dedeicated EBS volme per instance
     Type: Number
     Default: 30
 

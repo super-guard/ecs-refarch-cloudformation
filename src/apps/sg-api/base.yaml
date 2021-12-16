@@ -37,7 +37,7 @@ Resources:
       TemplateURL: !Sub https://${S3Bucket}.s3.${S3Region}.amazonaws.com/service/ecs-cluster.yaml
       Parameters:
         EnvironmentName: !Ref EnvironmentName
-        ClusterName: known-hosts
+        ClusterName: ecs-hosts
         InstanceType: t2.medium
         ClusterSize: 1
         MaxClusterSize: 4
