@@ -31,6 +31,7 @@ Resources:
         EnvironmentName: !Ref EnvironmentName
         ClusterName: facetec-hosts
         InstanceType: c5.2xlarge
+        InstanceVolumeSize: 150
         KeyName: SG-Dev
         ClusterSize: 1
         MaxClusterSize: 4
