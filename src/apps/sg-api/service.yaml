@@ -108,7 +108,10 @@ Resources:
               Value: !Ref EnvRedisPort
             - Name: FACETEC_API_BASE_URL
               Value:
-                Fn::ImportValue: !Sub ${EnvironmentName}:PrivateLoadBalancerUrl
+                Fn::Join:
+                  - ''
+                  - - 'http://'
+                    - Fn::ImportValue: !Sub ${EnvironmentName}:PrivateLoadBalancerUrl
           Secrets:
             - Name: DATABASE_URI
               ValueFrom: !Sub
