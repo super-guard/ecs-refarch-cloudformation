@@ -46,7 +46,11 @@ Resources:
         KeyName: SG-Dev
         VPC: !GetAtt VPC.Outputs.VPC
         EnvironmentName: !Ref EnvironmentName
-        PublicSubnet: !Select [0, !GetAtt VPC.Outputs.PublicSubnets]
+        PublicSubnet: !Select
+          - 0
+          - !Split
+            - ','
+            - !GetAtt VPC.Outputs.PublicSubnets
 
   SecurityGroups:
     Type: AWS::CloudFormation::Stack
