@@ -1,0 +1,68 @@
+Description: >
+
+  This template deploys the environment specific bastion host, that allows us to SSH into the private subnet instances.
+  Author: Varshneya Rao <varshneya.rao@toptal.com> (Original - Paul Maddox <pmaddox@amazon.com>)
+
+Parameters:
+  EnvironmentName:
+    Type: String
+    Default: production
+    Description: The name of the environment this stack is being deployed for
+
+  AMI:
+    Type: AWS::SSM::Parameter::Value<AWS::EC2::Image::Id>
+    Default: /aws/service/ami-amazon-linux-latest/amzn2-ami-hvm-x86_64-gp2
+
+  InstanceType:
+    Type: String
+    Description: The type of EC2 Instnace to use for creating the host
+    Default: t3.micro
+
+  KeyName:
+    Type: String
+    Description: The SSH Key to use for accessing the instance
+
+  PublicSubnet:
+    Type: AWS::EC2::Subnet::Id
+    Description: Choose which public subnet this host should be deployed to
+
+  VPC:
+    Type: AWS::EC2::VPC::Id
+    Description: Choose which VPC the host should be deployed to
+
+Resources:
+  BastionInstance:
+    Type: AWS::EC2::Instance
+    Properties:
+      ImageId: !Ref AMI
+      InstanceType: !Ref InstanceType
+      KeyName: !Ref KeyName
+      SubnetId: !Ref PublicSubnet
+      SecurityGroupIds:
+        - !Ref BastionSecurityGroup
+      Tags:
+        - Key: Name
+          Value: !Sub '${EnvironmentName}-BastionInstance'
+
+  BastionSecurityGroup:
+    Type: AWS::EC2::SecurityGroup
+    Properties:
+      GroupDescription: !Sub 'Security group for ${EnvironmentName} bastion host'
+      VpcId: !Ref VPC
+      Tags:
+        - Key: Name
+          Value: !Sub ${EnvironmentName}-Basiton
+
+  BastionAllowInboundSSHFromInternet:
+    Type: AWS::EC2::SecurityGroupIngress
+    Properties:
+      GroupId: !Ref BastionSecurityGroup
+      IpProtocol: tcp
+      FromPort: 22
+      ToPort: 22
+      CidrIp: 0.0.0.0/0
+
+Outputs:
+  BastionSecurityGroup:
+    Description: A reference to the security group for the Bastion host
+    Value: !Ref BastionSecurityGroup

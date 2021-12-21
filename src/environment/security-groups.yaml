@@ -12,6 +12,10 @@ Parameters:
     Type: AWS::EC2::VPC::Id
     Description: Choose which VPC the security groups should be deployed to
 
+  BastionGroup:
+    Description: The Security Group to allow SSH access to privae gorups
+    Type: AWS::EC2::SecurityGroup::Id
+
 Resources:
   # This security group defines who/where is allowed to access the Public Application Load Balancer.
   PublicLoadBalancerSecurityGroup:
@@ -36,9 +40,14 @@ Resources:
       VpcId: !Ref VPC
       GroupDescription: Access to the ECS hosts and the tasks/containers that run on them
       SecurityGroupIngress:
-        # Only allow inbound access to ECS from the public ALB
+        # Only allow inbound access to ECS instances from the public ALB
         - SourceSecurityGroupId: !Ref PublicLoadBalancerSecurityGroup
           IpProtocol: -1
+        # allow inbound SSH access to ECS instances only from the bastion host
+        - SourceSecurityGroupId: !Ref BastionGroup
+          IpProtocol: tcp
+          FromPort: 22
+          ToPort: 22
       Tags:
         - Key: Name
           Value: !Sub ${EnvironmentName}-ECS-Hosts
@@ -64,9 +73,14 @@ Resources:
       VpcId: !Ref VPC
       GroupDescription: Access to the FaceTec Cluster
       SecurityGroupIngress:
-        # Only allow inbound access to ECS from the private ALB
+        # Only allow inbound access to FaceTec instances from the private ALB
         - SourceSecurityGroupId: !Ref PrivateLoadBalancerSecurityGroup
           IpProtocol: -1
+        # allow inbound SSH access to FaceTec instances only from the bastion host
+        - SourceSecurityGroupId: !Ref BastionGroup
+          IpProtocol: tcp
+          FromPort: 22
+          ToPort: 22
       Tags:
         - Key: Name
           Value: !Sub ${EnvironmentName}-FaceTec-Hosts

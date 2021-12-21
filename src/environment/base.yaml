@@ -38,12 +38,23 @@ Resources:
         PrivateSubnet1CIDR: 10.180.24.0/21
         PrivateSubnet2CIDR: 10.180.32.0/21
 
+  BastionHost:
+    Type: AWS::CloudFormation::Stack
+    Properties:
+      TemplateURL: !Sub https://${S3Bucket}.s3.${S3Region}.amazonaws.com/environment/bastion.yaml
+      Parameters:
+        KeyName: SG-Dev
+        VPC: !GetAtt VPC.Outputs.VPC
+        EnvironmentName: !Ref EnvironmentName
+        PublicSubnet: !Select [0, !GetAtt VPC.Outputs.PublicSubnets]
+
   SecurityGroups:
     Type: AWS::CloudFormation::Stack
     Properties:
       TemplateURL: !Sub https://${S3Bucket}.s3.${S3Region}.amazonaws.com/environment/security-groups.yaml
       Parameters:
         EnvironmentName: !Ref EnvironmentName
+        BastionGroup: !GetAtt BastionHost.Outputs.BastionSecurityGroup
         VPC: !GetAtt VPC.Outputs.VPC
 
   PublicALB:
@@ -132,6 +143,12 @@ Outputs:
     Value: !GetAtt SecurityGroups.Outputs.ECSHostSecurityGroup
     Export:
       Name: !Sub ${EnvironmentName}:ECSHostSecurityGroup
+
+  BastionHostSecurityGroup:
+    Description: The securtity group for the Bastion host
+    Value: !GetAtt BastionHost.Outputs.BastionSecurityGroup
+    Export:
+      Name: !Sub ${EnvironmentName}:BastionSecurityGroup
 
   FaceTecHostSecurityGroup:
     Description: The securtity group to allow access to the FaceTec hosts
