@@ -44,6 +44,10 @@ Parameters:
     Type: AWS::SSM::Parameter::Value<AWS::EC2::Image::Id>
     Default: /aws/service/ecs/optimized-ami/amazon-linux/recommended/image_id
 
+  KeyName:
+    Type: String
+    Description: The SSH Key to use for accessing the instance
+
 Resources:
   ECSCluster:
     Type: AWS::ECS::Cluster
@@ -84,6 +88,7 @@ Resources:
     Properties:
       ImageId: !Ref ECSAMI
       InstanceType: !Ref InstanceType
+      KeyName: !Ref KeyName
       SecurityGroups:
         - !Ref SecurityGroup
       IamInstanceProfile: !Ref ECSInstanceProfile

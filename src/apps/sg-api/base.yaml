@@ -39,6 +39,7 @@ Resources:
         EnvironmentName: !Ref EnvironmentName
         ClusterName: ecs-hosts
         InstanceType: t2.medium
+        KeyName: SG-Dev
         ClusterSize: 1
         MaxClusterSize: 4
         Subnets:
