@@ -93,7 +93,7 @@ Resources:
         - !Ref SecurityGroup
       IamInstanceProfile: !Ref ECSInstanceProfile
       BlockDeviceMappings:
-        - DeviceName: /dev/sda1
+        - DeviceName: /dev/xvda
           Ebs:
             VolumeSize: !Ref InstanceVolumeSize
       UserData:
