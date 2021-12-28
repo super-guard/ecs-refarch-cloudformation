@@ -72,7 +72,7 @@ Resources:
         Timeout: PT15M
     UpdatePolicy:
       AutoScalingRollingUpdate:
-        MinInstancesInService: 1
+        # MinInstancesInService: 1
         MaxBatchSize: 1
         PauseTime: PT15M
         SuspendProcesses:
