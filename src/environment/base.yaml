@@ -87,6 +87,15 @@ Resources:
         SSLCert:
           Fn::ImportValue: SuperGuardDomainCertificate
 
+  Apps:
+    Type: AWS::CloudFormation::Stack
+    Properties:
+      TemplateURL: !Sub https://${S3Bucket}.s3.${S3Region}.amazonaws.com/environment/apps.yaml
+      Parameters:
+        EnvironmentName: !Ref EnvironmentName
+        S3Bucket: !Ref S3Bucket
+        S3Region: !Ref S3Region
+
 Outputs:
   VPC:
     Description: The ID of the VPC that this stack is deployed in
@@ -142,11 +151,11 @@ Outputs:
     Export:
       Name: !Sub ${EnvironmentName}:PrivateLoadBalancerHostedZone
 
-  ECSHostSecurityGroup:
+  APIHostSecurityGroup:
     Description: The securtity group to allow access to the ECS hosts
-    Value: !GetAtt SecurityGroups.Outputs.ECSHostSecurityGroup
+    Value: !GetAtt SecurityGroups.Outputs.APIHostSecurityGroup
     Export:
-      Name: !Sub ${EnvironmentName}:ECSHostSecurityGroup
+      Name: !Sub ${EnvironmentName}:APIHostSecurityGroup
 
   BastionHostSecurityGroup:
     Description: The securtity group for the Bastion host

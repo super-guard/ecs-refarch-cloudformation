@@ -29,18 +29,33 @@ Resources:
           IpProtocol: -1
       Tags:
         - Key: Name
-          Value: !Sub ${EnvironmentName}-LoadBalancer-Public
+          Value: !Sub ${EnvironmentName}-PublicLoadBalancer-SG
 
-  # This security group defines who/where is allowed to access the ECS hosts directly.
-  # By default we're just allowing access from the load balancer.  If you want to SSH
-  # into the hosts, or expose non-load balanced services you can open their ports here.
-  ECSHostSecurityGroup:
+  # This security group defines who/where is allowed to access the Private Application Load Balancer.
+  PrivateLoadBalancerSecurityGroup:
+    Type: AWS::EC2::SecurityGroup
+    Properties:
+      VpcId: !Ref VPC
+      GroupDescription: Access to the private load balancer that sits in front of ECS
+      SecurityGroupIngress:
+        # Allow inbound access from API hosts
+        - SourceSecurityGroupId: !Ref APIHostSecurityGroup
+          IpProtocol: -1
+        # Allow inbound access from UI hosts
+        - SourceSecurityGroupId: !Ref UIHostSecurityGroup
+          IpProtocol: -1
+      Tags:
+        - Key: Name
+          Value: !Sub ${EnvironmentName}-PrivateLoadBalancer-SG
+
+  # This security group defines who/where is allowed to access the API hosts
+  UIHostSecurityGroup:
     Type: AWS::EC2::SecurityGroup
     Properties:
       VpcId: !Ref VPC
       GroupDescription: Access to the ECS hosts and the tasks/containers that run on them
       SecurityGroupIngress:
-        # Only allow inbound access to ECS instances from the public ALB
+        # Only allow inbound access to UI instances from the public ALB
         - SourceSecurityGroupId: !Ref PublicLoadBalancerSecurityGroup
           IpProtocol: -1
         # allow inbound SSH access to ECS instances only from the bastion host
@@ -50,23 +65,31 @@ Resources:
           ToPort: 22
       Tags:
         - Key: Name
-          Value: !Sub ${EnvironmentName}-ECS-Hosts
+          Value: !Sub ${EnvironmentName}-UIHosts-SG
 
-  # This security group defines who/where is allowed to access the Private Application Load Balancer.
-  PrivateLoadBalancerSecurityGroup:
+  # This security group defines who/where is allowed to access the API hosts
+  APIHostSecurityGroup:
     Type: AWS::EC2::SecurityGroup
     Properties:
       VpcId: !Ref VPC
-      GroupDescription: Access to the private load balancer that sits in front of ECS
+      GroupDescription: Access to the ECS hosts and the tasks/containers that run on them
       SecurityGroupIngress:
-        # Only allow inbound access from ECS hosts
-        - SourceSecurityGroupId: !Ref ECSHostSecurityGroup
+        # Allow inbound access to API instances from the public ALB
+        - SourceSecurityGroupId: !Ref PublicLoadBalancerSecurityGroup
           IpProtocol: -1
+        # Allow inbound access to API instances from the UI instances
+        - SourceSecurityGroupId: !Ref UIHostSecurityGroup
+          IpProtocol: -1
+        # allow inbound SSH access to ECS instances only from the bastion host
+        - SourceSecurityGroupId: !Ref BastionGroup
+          IpProtocol: tcp
+          FromPort: 22
+          ToPort: 22
       Tags:
         - Key: Name
-          Value: !Sub ${EnvironmentName}-LoadBalancer-Private
+          Value: !Sub ${EnvironmentName}-APIHosts-SG
 
-  # This security group defines who/where is allowed to access the Mongo VPCE
+  # This security group defines who/where is allowed to access the FaceTec hosts
   FaceTecHostSecurityGroup:
     Type: AWS::EC2::SecurityGroup
     Properties:
@@ -83,7 +106,7 @@ Resources:
           ToPort: 22
       Tags:
         - Key: Name
-          Value: !Sub ${EnvironmentName}-FaceTec-Hosts
+          Value: !Sub ${EnvironmentName}-FaceTecHosts-SG
 
   # This security group defines who/where is allowed to access the Mongo VPCE
   MongoVPCESecurityGroup:
@@ -93,23 +116,15 @@ Resources:
       GroupDescription: Access to the Mongo VPCE for the tasks/containers that run on the cluster
       SecurityGroupIngress:
         # Allow access from ECS hosts, and facetec
-        - SourceSecurityGroupId: !Ref ECSHostSecurityGroup
+        - SourceSecurityGroupId: !Ref APIHostSecurityGroup
           IpProtocol: -1
         - SourceSecurityGroupId: !Ref FaceTecHostSecurityGroup
           IpProtocol: -1
       Tags:
         - Key: Name
-          Value: !Sub ${EnvironmentName}-Mongo-VPCE
+          Value: !Sub ${EnvironmentName}-MongoVPCE-SG
 
 Outputs:
-  ECSHostSecurityGroup:
-    Description: A reference to the security group for ECS hosts
-    Value: !Ref ECSHostSecurityGroup
-
-  FaceTecHostSecurityGroup:
-    Description: A reference to the security group for FaceTec hosts
-    Value: !Ref FaceTecHostSecurityGroup
-
   PublicLoadBalancerSecurityGroup:
     Description: A reference to the security group for the public load balancer
     Value: !Ref PublicLoadBalancerSecurityGroup
@@ -117,6 +132,18 @@ Outputs:
   PrivateLoadBalancerSecurityGroup:
     Description: A reference to the security group for the private load balancer
     Value: !Ref PrivateLoadBalancerSecurityGroup
+
+  APIHostSecurityGroup:
+    Description: A reference to the security group for API hosts
+    Value: !Ref APIHostSecurityGroup
+
+  FaceTecHostSecurityGroup:
+    Description: A reference to the security group for FaceTec hosts
+    Value: !Ref FaceTecHostSecurityGroup
+
+  UIHostSecurityGroup:
+    Description: A reference to the security group for UI hosts
+    Value: !Ref UIHostSecurityGroup
 
   MongoVPCESecurityGroup:
     Description: A reference to the security group for Mongo VPCE

@@ -65,7 +65,7 @@ Resources:
       DesiredCapacity: !Ref ClusterSize
       Tags:
         - Key: Name
-          Value: !Sub ${ECSCluster} ECS host
+          Value: !Sub ${EnvironmentName}-${ClusterName}
           PropagateAtLaunch: true
     CreationPolicy:
       ResourceSignal:

@@ -57,7 +57,7 @@ Resources:
     DependsOn: ListenerRule
     Properties:
       Cluster:
-        Fn::ImportValue: !Sub ${EnvironmentName}:APICluster
+        Fn::ImportValue: !Sub ${EnvironmentName}:UICluster
       Role: !Ref ServiceRole
       DesiredCount: !Ref DesiredCount
       TaskDefinition: !Ref TaskDefinition

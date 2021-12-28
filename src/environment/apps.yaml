@@ -1,0 +1,152 @@
+Description: >
+
+  This template deploys highly available ECS clusters using AutoScaling Groups, with 
+  ECS hosts for various instances distributed across multiple Availability Zones.
+
+  Last Modified: 4th November 2021
+  Author: Varshneya Rao <varshneya.rao@toptal.com> (Original - Paul Maddox <pmaddox@amazon.com>)
+
+Parameters:
+  EnvironmentName:
+    Type: String
+    Default: production
+    Description: The name of the environment this stack is being deployed for
+
+  S3Bucket:
+    Type: String
+    Description: Please provide the S3 Bucket to find the Cloudformation yaml files
+    Default: superguard-ecs-cloudformation
+
+  S3Region:
+    Type: String
+    Description: Please provide the S3 region hosting the S3 bucket
+    Default: ap-southeast-2
+
+Resources:
+  UIRepo:
+    Type: AWS::CloudFormation::Stack
+    Properties:
+      TemplateURL: !Sub https://${S3Bucket}.s3.${S3Region}.amazonaws.com/service/image-repo.yaml
+      Parameters:
+        EnvironmentName: !Ref EnvironmentName
+        RepoName: sg-ui
+
+  APIRepo:
+    Type: AWS::CloudFormation::Stack
+    Properties:
+      TemplateURL: !Sub https://${S3Bucket}.s3.${S3Region}.amazonaws.com/service/image-repo.yaml
+      Parameters:
+        EnvironmentName: !Ref EnvironmentName
+        RepoName: sg-api
+
+  FaceTecCluster:
+    Type: AWS::CloudFormation::Stack
+    Properties:
+      TemplateURL: !Sub https://${S3Bucket}.s3.${S3Region}.amazonaws.com/service/ecs-cluster.yaml
+      Parameters:
+        EnvironmentName: !Ref EnvironmentName
+        ClusterName: facetec-hosts
+        InstanceType: c5.2xlarge
+        InstanceVolumeSize: 150
+        KeyName: SG-Dev
+        ClusterSize: 1
+        MaxClusterSize: 4
+        Subnets:
+          # Fn::ImportValue: !Sub ${EnvironmentName}:PrivateSubnets
+          Fn::ImportValue: !Sub ${EnvironmentName}:PublicSubnets
+        SecurityGroup:
+          Fn::ImportValue: !Sub ${EnvironmentName}:FaceTecHostSecurityGroup
+
+  FaceTecLifecycleHook:
+    Type: AWS::CloudFormation::Stack
+    Properties:
+      TemplateURL: !Sub https://${S3Bucket}.s3.${S3Region}.amazonaws.com/service/lifecyclehook.yaml
+      Parameters:
+        Cluster: !GetAtt FaceTecCluster.Outputs.Cluster
+        ECSAutoScalingGroupName: !GetAtt FaceTecCluster.Outputs.ECSAutoScalingGroupName
+
+  UICluster:
+    Type: AWS::CloudFormation::Stack
+    Properties:
+      TemplateURL: !Sub https://${S3Bucket}.s3.${S3Region}.amazonaws.com/service/ecs-cluster.yaml
+      Parameters:
+        EnvironmentName: !Ref EnvironmentName
+        ClusterName: ui-hosts
+        InstanceType: t2.medium
+        KeyName: SG-Dev
+        ClusterSize: 1
+        MaxClusterSize: 4
+        Subnets:
+          Fn::ImportValue: !Sub ${EnvironmentName}:PublicSubnets
+        SecurityGroup:
+          Fn::ImportValue: !Sub ${EnvironmentName}:UIHostSecurityGroup
+
+  UILifecycleHook:
+    Type: AWS::CloudFormation::Stack
+    Properties:
+      TemplateURL: !Sub https://${S3Bucket}.s3.${S3Region}.amazonaws.com/service/lifecyclehook.yaml
+      Parameters:
+        Cluster: !GetAtt UICluster.Outputs.Cluster
+        ECSAutoScalingGroupName: !GetAtt UICluster.Outputs.ECSAutoScalingGroupName
+
+  APICluster:
+    Type: AWS::CloudFormation::Stack
+    Properties:
+      TemplateURL: !Sub https://${S3Bucket}.s3.${S3Region}.amazonaws.com/service/ecs-cluster.yaml
+      Parameters:
+        EnvironmentName: !Ref EnvironmentName
+        ClusterName: api-hosts
+        InstanceType: t2.medium
+        KeyName: SG-Dev
+        ClusterSize: 1
+        MaxClusterSize: 4
+        Subnets:
+          # Fn::ImportValue: !Sub ${EnvironmentName}:PrivateSubnets
+          Fn::ImportValue: !Sub ${EnvironmentName}:PublicSubnets
+        SecurityGroup:
+          Fn::ImportValue: !Sub ${EnvironmentName}:APIHostSecurityGroup
+
+  APILifecycleHook:
+    Type: AWS::CloudFormation::Stack
+    Properties:
+      TemplateURL: !Sub https://${S3Bucket}.s3.${S3Region}.amazonaws.com/service/lifecyclehook.yaml
+      Parameters:
+        Cluster: !GetAtt APICluster.Outputs.Cluster
+        ECSAutoScalingGroupName: !GetAtt APICluster.Outputs.ECSAutoScalingGroupName
+
+Outputs:
+  FaceTecCluster:
+    Description: The ECS Cluster ID that FaceTec services should run on
+    Value: !GetAtt FaceTecCluster.Outputs.Cluster
+    Export:
+      Name: !Sub ${EnvironmentName}:FaceTecCluster
+
+  UICluster:
+    Description: The ECS Cluster ID that UI services should run on
+    Value: !GetAtt UICluster.Outputs.Cluster
+    Export:
+      Name: !Sub ${EnvironmentName}:UICluster
+
+  APICluster:
+    Description: The ECS Cluster ID that API services should run on
+    Value: !GetAtt APICluster.Outputs.Cluster
+    Export:
+      Name: !Sub ${EnvironmentName}:APICluster
+
+  FaceTecServiceAutoScalingRoleARN:
+    Description: The FaceTec service auto scaling role ARN
+    Value: !GetAtt FaceTecCluster.Outputs.ECSServiceAutoScalingRole
+    Export:
+      Name: !Sub ${EnvironmentName}:FaceTecServiceAutoScalingRoleARN
+
+  UIServiceAutoScalingRoleARN:
+    Description: The UI service auto scaling role ARN
+    Value: !GetAtt UICluster.Outputs.ECSServiceAutoScalingRole
+    Export:
+      Name: !Sub ${EnvironmentName}:UIServiceAutoScalingRoleARN
+
+  APIServiceAutoScalingRoleARN:
+    Description: The API service auto scaling role ARN
+    Value: !GetAtt APICluster.Outputs.ECSServiceAutoScalingRole
+    Export:
+      Name: !Sub ${EnvironmentName}:APIServiceAutoScalingRoleARN

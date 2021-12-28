@@ -42,7 +42,7 @@ Resources:
         - !Ref BastionSecurityGroup
       Tags:
         - Key: Name
-          Value: !Sub '${EnvironmentName}-BastionInstance'
+          Value: !Sub '${EnvironmentName}-Bastion-Instance'
 
   BastionSecurityGroup:
     Type: AWS::EC2::SecurityGroup
@@ -51,7 +51,7 @@ Resources:
       VpcId: !Ref VPC
       Tags:
         - Key: Name
-          Value: !Sub ${EnvironmentName}-Basiton
+          Value: !Sub ${EnvironmentName}-Basiton-SG
 
   BastionAllowInboundSSHFromInternet:
     Type: AWS::EC2::SecurityGroupIngress
