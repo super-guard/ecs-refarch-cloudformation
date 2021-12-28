@@ -148,6 +148,12 @@ Outputs:
     Export:
       Name: !Sub ${EnvironmentName}:APIHostSecurityGroup
 
+  UIHostSecurityGroup:
+    Description: The securtity group to allow access to the UI hosts
+    Value: !GetAtt SecurityGroups.Outputs.UIHostSecurityGroup
+    Export:
+      Name: !Sub ${EnvironmentName}:UIHostSecurityGroup
+
   BastionHostSecurityGroup:
     Description: The securtity group for the Bastion host
     Value: !GetAtt BastionHost.Outputs.BastionSecurityGroup
