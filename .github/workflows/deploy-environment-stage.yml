@@ -61,12 +61,25 @@ jobs:
           aws-secret-access-key: ${{ env.AWS_SECRET_ACCESS_KEY }}
           aws-region: ${{ env.AWS_REGION }}
 
-      - name: Deploy the services infrastructure with CloudFormation
+      - name: Deploy the environment base infrastructure with CloudFormation
         id: environment-infra-stack
         uses: aws-actions/aws-cloudformation-github-deploy@v1
         with:
-          name: ${{ env.ENV_NAME }}-services-infrastructure
+          name: ${{ env.ENV_NAME }}-environment-base
           template: https://${{ env.CLOUDFORMATION_TEMPLATES_S3_BUCKET }}.s3.${{ env.AWS_REGION }}.amazonaws.com/environment/base.yaml
+          capabilities: 'CAPABILITY_NAMED_IAM'
+          no-fail-on-empty-changeset: '1'
+          parameter-overrides: >-
+            EnvironmentName=${{ env.ENV_NAME }},
+            S3Bucket=${{ env.CLOUDFORMATION_TEMPLATES_S3_BUCKET }},
+            S3Region=${{ env.AWS_REGION }}
+
+      - name: Deploy the environment apps infrastructure with CloudFormation
+        id: environment-apps-stack
+        uses: aws-actions/aws-cloudformation-github-deploy@v1
+        with:
+          name: ${{ env.ENV_NAME }}-apps-services
+          template: https://${{ env.CLOUDFORMATION_TEMPLATES_S3_BUCKET }}.s3.${{ env.AWS_REGION }}.amazonaws.com/apps/base.yaml
           capabilities: 'CAPABILITY_NAMED_IAM'
           no-fail-on-empty-changeset: '1'
           parameter-overrides: >-
