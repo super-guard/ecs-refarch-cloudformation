@@ -96,9 +96,12 @@ Resources:
       VpcId: !Ref VPC
       GroupDescription: Access to the FaceTec Cluster
       SecurityGroupIngress:
-        # Only allow inbound access to FaceTec instances from the private ALB
-        - SourceSecurityGroupId: !Ref PrivateLoadBalancerSecurityGroup
+        # TODO: Remove this after testing
+        - SourceSecurityGroupId: !Ref PublicLoadBalancerSecurityGroup
           IpProtocol: -1
+        # # Only allow inbound access to FaceTec instances from the private ALB
+        # - SourceSecurityGroupId: !Ref PrivateLoadBalancerSecurityGroup
+        #   IpProtocol: -1
         # allow inbound SSH access to FaceTec instances only from the bastion host
         - SourceSecurityGroupId: !Ref BastionGroup
           IpProtocol: tcp
