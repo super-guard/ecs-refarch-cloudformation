@@ -53,6 +53,7 @@ Resources:
         MaxClusterSize: 4
         Subnets:
           # Fn::ImportValue: !Sub ${EnvironmentName}:PrivateSubnets
+          # TODO: Remove this after testing
           Fn::ImportValue: !Sub ${EnvironmentName}:PublicSubnets
         SecurityGroup:
           Fn::ImportValue: !Sub ${EnvironmentName}:FaceTecHostSecurityGroup
@@ -102,6 +103,7 @@ Resources:
         MaxClusterSize: 4
         Subnets:
           # Fn::ImportValue: !Sub ${EnvironmentName}:PrivateSubnets
+          # TODO: Remove this after testing
           Fn::ImportValue: !Sub ${EnvironmentName}:PublicSubnets
         SecurityGroup:
           Fn::ImportValue: !Sub ${EnvironmentName}:APIHostSecurityGroup

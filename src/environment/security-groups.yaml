@@ -38,6 +38,9 @@ Resources:
       VpcId: !Ref VPC
       GroupDescription: Access to the private load balancer that sits in front of ECS
       SecurityGroupIngress:
+        # TODO: Remove this after testing
+        - CidrIp: 0.0.0.0/0
+          IpProtocol: -1
         # Allow inbound access from API hosts
         - SourceSecurityGroupId: !Ref APIHostSecurityGroup
           IpProtocol: -1
