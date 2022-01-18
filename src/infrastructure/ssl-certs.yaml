@@ -4,7 +4,12 @@ Description: >
 Parameters:
   Domain:
     Type: String
-    Description: The domain we're registering the SSL certs for
+    Description: The domain we're registering the SSL cert for
+
+  AltDomains:
+    Type: String
+    Description: The comma separated alternate domain names we're registering the SSL cert for
+    Default: ''
 
   HostedZone:
     Type: String
@@ -20,7 +25,7 @@ Resources:
         - DomainName: !Ref Domain
           HostedZoneId: !Ref HostedZone
       SubjectAlternativeNames:
-        - !Sub '*.${Domain}'
+        [!Sub '*.${Domain}', !Split [',', !Ref AltDomains]]
 
 Outputs:
   SSLCert:

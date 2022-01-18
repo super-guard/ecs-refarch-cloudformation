@@ -26,6 +26,12 @@ Resources:
       TemplateURL: !Sub https://${S3Bucket}.s3.${S3Region}.amazonaws.com/infrastructure/ssl-certs.yaml
       Parameters:
         Domain: superguard.com.au
+        AltDomains: !Join
+          - ','
+          - - 'app.superguard.com.au'
+            - '*.app.superguard.com.au'
+            - 'app-dev.superguard.com.au'
+            - '*.app-dev.superguard.com.au'
         HostedZone: !GetAtt TopLevelDNS.Outputs.HostedZone
 
 Outputs:
