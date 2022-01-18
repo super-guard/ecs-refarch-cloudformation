@@ -14,20 +14,34 @@ Parameters:
   HostedZone:
     Type: String
     Description: The ID fo the hosted zone to use for SSL validation
+    Default: ''
+
+Conditions:
+  HostedZoneProvided: !Not [!Equals [!Ref HostedZone, '']]
+  HasAltDomains: !Not [!Equals [!Ref AltDomains, '']]
 
 Resources:
-  TopLevelSSL:
+  SSLCert:
     Type: AWS::CertificateManager::Certificate
     Properties:
       DomainName: !Ref Domain
       ValidationMethod: DNS
       DomainValidationOptions:
         - DomainName: !Ref Domain
-          HostedZoneId: !Ref HostedZone
+          HostedZoneId:
+            !If [
+              HostedZoneProvided,
+              !Ref HostedZone,
+              !ImportValue SuperGuardHostedZone,
+            ]
       SubjectAlternativeNames:
-        !Split [',', !Join [',', [!Sub '*.${Domain}', !Ref AltDomains]]]
+        !If [
+          HasAltDomains,
+          !Split [',', !Join [',', [!Sub '*.${Domain}', !Ref AltDomains]]],
+          !Sub '*.${Domain}',
+        ]
 
 Outputs:
   SSLCert:
     Description: The ARN of the SSL cert zone for the requested Domain
-    Value: !Ref TopLevelSSL
+    Value: !Ref SSLCert
