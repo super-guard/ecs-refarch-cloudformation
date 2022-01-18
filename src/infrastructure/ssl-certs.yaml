@@ -25,7 +25,7 @@ Resources:
         - DomainName: !Ref Domain
           HostedZoneId: !Ref HostedZone
       SubjectAlternativeNames:
-        [!Sub '*.${Domain}', !Split [',', !Ref AltDomains]]
+        !Split [',', !Join [',', [!Sub '*.${Domain}', !Ref AltDomains]]]
 
 Outputs:
   SSLCert:
