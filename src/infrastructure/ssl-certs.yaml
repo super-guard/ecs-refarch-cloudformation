@@ -38,7 +38,7 @@ Resources:
         !If [
           HasAltDomains,
           !Split [',', !Join [',', [!Sub '*.${Domain}', !Ref AltDomains]]],
-          !Sub '*.${Domain}',
+          [!Sub '*.${Domain}'],
         ]
 
 Outputs:
