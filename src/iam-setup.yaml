@@ -45,6 +45,7 @@ Resources:
               - 'elasticloadbalancing:*'
               - 'route53:*'
               - 'acm:*'
+              - 's3:*'
             Effect: Allow
             Resource: '*'
           - Action:
